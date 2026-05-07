@@ -1,0 +1,23 @@
+CLAUDE.md
+.claude
+
+# Env
+.env
+.env.local
+
+# Node
+node_modules/
+dist/
+.pnpm-store/
+
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/lib/
+
+# Next.js
+app/.next/
+app/out/
+
+# OS
+.DS_Store

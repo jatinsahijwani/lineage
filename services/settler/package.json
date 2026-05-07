@@ -1,0 +1,26 @@
+{
+  "name": "@lineage/settler",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@lineage/sdk": "workspace:*",
+    "@lineage/shared": "workspace:*",
+    "cbor-x": "^1.6.0",
+    "merkletreejs": "^0.4.0",
+    "keccak256": "^1.0.6",
+    "viem": "^2.22.6",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@lineage/runner": "workspace:*",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

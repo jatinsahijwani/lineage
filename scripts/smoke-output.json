@@ -1,0 +1,537 @@
+{
+  "ranAt": "2026-05-07T08:38:09.584Z",
+  "endpoints": {
+    "rpc": "https://evmrpc-testnet.0g.ai",
+    "storage": "https://indexer-storage-testnet-turbo.0g.ai",
+    "da": "https://da.0g.ai",
+    "compute": "https://compute-testnet.0g.ai"
+  },
+  "wallet": {
+    "address": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3"
+  },
+  "summary": {
+    "total": 10,
+    "ok": 9,
+    "failed": 0,
+    "skipped": 1,
+    "critical": 1,
+    "warnings": 1,
+    "infos": 1
+  },
+  "probes": {
+    "chain.getChainId": {
+      "name": "chain.getChainId",
+      "primitive": "chain",
+      "ok": true,
+      "durationMs": 802,
+      "request": {
+        "method": "eth_chainId",
+        "args": {}
+      },
+      "response": 16602,
+      "observedShape": "number(16602)",
+      "drift": []
+    },
+    "chain.getBlockNumber": {
+      "name": "chain.getBlockNumber",
+      "primitive": "chain",
+      "ok": true,
+      "durationMs": 716,
+      "request": {
+        "method": "eth_blockNumber",
+        "args": {}
+      },
+      "response": "32012075n",
+      "observedShape": "bigint",
+      "drift": []
+    },
+    "chain.getBalance": {
+      "name": "chain.getBalance",
+      "primitive": "chain",
+      "ok": true,
+      "durationMs": 247,
+      "request": {
+        "method": "eth_getBalance",
+        "args": {
+          "address": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3"
+        }
+      },
+      "response": {
+        "address": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
+        "wei": "12586723343373961677n"
+      },
+      "observedShape": "{ address: hex(20B), wei: bigint }",
+      "drift": []
+    },
+    "chain.readContract": {
+      "name": "chain.readContract",
+      "primitive": "chain",
+      "ok": false,
+      "durationMs": 0,
+      "request": {
+        "method": "(skipped)",
+        "args": null
+      },
+      "response": null,
+      "observedShape": "",
+      "drift": [],
+      "skipped": {
+        "reason": "no LineageRegistry in deployments.json — run pnpm deploy:testnet first"
+      }
+    },
+    "storage.upload": {
+      "name": "storage.upload",
+      "primitive": "storage",
+      "ok": true,
+      "durationMs": 13446,
+      "request": {
+        "method": "Indexer.upload",
+        "args": {
+          "blobBytes": 120,
+          "tag": "lineage-smoke-2026-05-07T08:37:31.931Z"
+        }
+      },
+      "response": {
+        "txHash": "0xd6ab21d460c3a72420f9bee4f75c6aed3002471bdf57d8cd65f9be745004d01c",
+        "rootHash": "0xe8d8a76caabd0bbed3e4fb15dbe681eda112e923d46ac7990e3d9aa3491802ae",
+        "txSeq": 92438
+      },
+      "observedShape": "{ txHash: hex(32B), rootHash: hex(32B), txSeq: number }",
+      "drift": []
+    },
+    "storage.download": {
+      "name": "storage.download",
+      "primitive": "storage",
+      "ok": true,
+      "durationMs": 2347,
+      "request": {
+        "method": "Indexer.downloadToBlob",
+        "args": {
+          "rootHash": "0xe8d8a76caabd0bbed3e4fb15dbe681eda112e923d46ac7990e3d9aa3491802ae"
+        }
+      },
+      "response": {
+        "sizeBytes": 120,
+        "recoveredTag": "lineage-smoke-2026-05-07T08:37:31.931Z",
+        "matches": true
+      },
+      "observedShape": "Blob(120B)",
+      "drift": []
+    },
+    "da.submit": {
+      "name": "da.submit",
+      "primitive": "da",
+      "ok": true,
+      "durationMs": 457,
+      "request": {
+        "method": "POST",
+        "args": {
+          "url": "https://da.0g.ai",
+          "paths": [
+            "/disperser/disperse_blob",
+            "/v1/blob",
+            "/da/v1/blob",
+            "/"
+          ],
+          "payloadBytes": 497
+        }
+      },
+      "response": {
+        "attempts": [
+          {
+            "path": "/disperser/disperse_blob",
+            "status": 404,
+            "contentType": "text/plain; charset=utf-8",
+            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::92w67-1778143068059-4888b8b37106\n",
+            "bodyLen": 79
+          },
+          {
+            "path": "/v1/blob",
+            "status": 404,
+            "contentType": "text/plain; charset=utf-8",
+            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::5dbqn-1778143068173-35156db7d6a3\n",
+            "bodyLen": 79
+          },
+          {
+            "path": "/da/v1/blob",
+            "status": 404,
+            "contentType": "text/plain; charset=utf-8",
+            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::m8msb-1778143068218-f87c91d6a807\n",
+            "bodyLen": 79
+          },
+          {
+            "path": "/",
+            "status": 405,
+            "contentType": "text/html; charset=utf-8",
+            "bodyPreview": "",
+            "bodyLen": 0
+          }
+        ],
+        "workingPath": null
+      },
+      "observedShape": "attempts[4], workingPath=none",
+      "drift": [
+        {
+          "severity": "critical",
+          "ours": {
+            "file": "services/runner/src/receipt-sink.ts",
+            "symbol": "DAReceiptSink",
+            "type": "throws 'pending 0G DA gRPC SDK'"
+          },
+          "actual": {
+            "type": "no working path found",
+            "value": null
+          },
+          "note": "None of the candidate paths returned 2xx. DA may not be live yet, or it expects a different protocol (gRPC). Inspect the per-path responses below."
+        },
+        {
+          "severity": "warning",
+          "ours": {
+            "file": "packages/shared/src/index.ts",
+            "symbol": "SettlementBatch.daCommitment",
+            "type": "`0x${string}` (bytes32)"
+          },
+          "actual": {
+            "type": "(no response)"
+          },
+          "note": "DA likely returns a KZG commitment + blob index, not a single bytes32. Schema may need a struct."
+        }
+      ]
+    },
+    "compute.listServices": {
+      "name": "compute.listServices",
+      "primitive": "compute",
+      "ok": true,
+      "durationMs": 983,
+      "request": {
+        "method": "createReadOnlyInferenceBroker(rpc).listService",
+        "args": {
+          "rpcUrl": "https://evmrpc-testnet.0g.ai"
+        }
+      },
+      "response": [
+        [
+          "0xa48f01287233509FD694a22Bf840225062E67836",
+          "chatbot",
+          "https://compute-network-6.integratenetwork.work",
+          "50000000000n",
+          "100000000000n",
+          "1777372525n",
+          "qwen/qwen-2.5-7b-instruct",
+          "TeeML",
+          "{\"ImageDigest\":\"\",\"ImageName\":\"\",\"ProviderIdentity\":\"aliyun\",\"ProviderType\":\"centralized\",\"TEEVerifier\":\"dstack\",\"TargetSeparated\":true,\"TargetTeeAddress\":\"\",\"VerifierURL\":\"https://github.com/Dstack-TEE/dstack/releases/tag/verifier-v0.5.8\"}",
+          "0x83df4B8EbA7c0B3B740019b8c9a77ffF77D508cF",
+          true
+        ],
+        [
+          "0x4b2a941929E39Adbea5316dDF2B9Bd8Ff3134389",
+          "image-editing",
+          "https://compute-network-17.integratenetwork.work",
+          "0n",
+          "5000000000000000n",
+          "1774854848n",
+          "qwen/qwen-image-edit-2511",
+          "TeeML",
+          "{\"ImageDigest\":\"\",\"ImageName\":\"\",\"TEEVerifier\":\"dstack\",\"TargetSeparated\":false,\"TargetTeeAddress\":\"\",\"VerifierURL\":\"https://github.com/Dstack-TEE/dstack/releases/tag/verifier-v0.5.7\"}",
+          "0x2A94D671f1A5e080f75A8164087Cdd35c8442e69",
+          true
+        ]
+      ],
+      "observedShape": "ServiceStructOutput[2]",
+      "drift": []
+    },
+    "compute.firstService": {
+      "name": "compute.firstService",
+      "primitive": "compute",
+      "ok": true,
+      "durationMs": 0,
+      "request": {
+        "method": "(inspect first ServiceStructOutput)",
+        "args": {
+          "provider": "0xa48f01287233509FD694a22Bf840225062E67836"
+        }
+      },
+      "response": {
+        "provider": "0xa48f01287233509FD694a22Bf840225062E67836",
+        "model": "qwen/qwen-2.5-7b-instruct",
+        "serviceType": "chatbot",
+        "url": "https://compute-network-6.integratenetwork.work",
+        "inputPrice": "50000000000",
+        "outputPrice": "100000000000",
+        "verifiability": "TeeML",
+        "teeSignerAddress": "0x83df4B8EbA7c0B3B740019b8c9a77ffF77D508cF",
+        "teeSignerAcknowledged": true,
+        "updatedAt": "1777372525"
+      },
+      "observedShape": "[hex(20B)×11]",
+      "drift": []
+    },
+    "compute.invoke": {
+      "name": "compute.invoke",
+      "primitive": "compute",
+      "ok": true,
+      "durationMs": 20415,
+      "request": {
+        "method": "POST {endpoint}/v1/chat/completions",
+        "args": {
+          "provider": "0xa48f01287233509FD694a22Bf840225062E67836",
+          "model": "qwen/qwen-2.5-7b-instruct",
+          "prompt": "Hi"
+        }
+      },
+      "response": {
+        "ledger": {
+          "action": "exists",
+          "balanceBefore": {
+            "totalBalance": "3000000000000000000",
+            "locked": null
+          }
+        },
+        "providerAck": {
+          "action": "already",
+          "teeSignerAddress": "0x83df4B8EbA7c0B3B740019b8c9a77ffF77D508cF"
+        },
+        "serviceMetadata": {
+          "endpoint": "https://compute-network-6.integratenetwork.work/v1/proxy",
+          "model": "qwen/qwen-2.5-7b-instruct"
+        },
+        "requestHeaders": {
+          "Authorization": "Bearer app-sk-eyJhZGRyZXNzIjoiMHhiYzc0Q2U1MTIzOUYwMTY1QzkzMUQ3MjQ2NGJCYmY4MzYwYWVBMEMzIiwicHJvdmlkZXIiOiIweGE0OGYwMTI4NzIzMzUwOUZENjk0YTIyQmY4NDAyMjUwNjJFNjc4MzYiLCJ0aW1lc3RhbXAiOjE3NzgxNDMwNzExODcsImV4cGlyZXNBdCI6MTc3ODIyOTQ3MTE4Nywibm9uY2UiOiIxNzc4MTQzMDcxMTg3LWg0a25tbThwOXNlMDAwMDAwMCIsImdlbmVyYXRpb24iOjAsInRva2VuSWQiOjI1NX18MHg4Y2FjZDcxNjRiMDYwZDhlOTI2ZGEzNmJmMDNjNTcyNWU4MTYxYTk4YTMwMTgyMWY3MjlhNjUxNjRiYTVkMDJjNGVlNDgxNTJjZWIxYTg2MTFkMWQxMmI4ZTU2ZGM1NjJhNDA3NzgxMzAxNWI5YzMxZDM2MzM4ZGNiMDFmMzUzYzFi"
+        },
+        "requestBody": {
+          "messages": [
+            {
+              "role": "user",
+              "content": "Hi"
+            }
+          ],
+          "model": "qwen/qwen-2.5-7b-instruct",
+          "max_tokens": 8,
+          "temperature": 0
+        },
+        "httpStatus": 200,
+        "usedPath": "/chat/completions",
+        "responseHeaders": {
+          "connection": "keep-alive",
+          "content-length": "281",
+          "content-type": "application/json",
+          "date": "Thu, 07 May 2026 08:37:53 GMT",
+          "server": "nginx/1.27.4",
+          "__failed_/v1/chat/completions_status": "400",
+          "access-control-expose-headers": "x-ratelimit-limit-requests, x-ratelimit-remaining-requests, x-ratelimit-reset-requests, x-ratelimit-limit-tokens, x-ratelimit-remaining-tokens, x-ratelimit-reset-tokens,Provider,content-encoding,ZG-Res-Key",
+          "content-encoding": "gzip",
+          "provider": "0xa48f01287233509FD694a22Bf840225062E67836",
+          "req-arrive-time": "1778143072950",
+          "req-cost-time": "233",
+          "resp-start-time": "1778143073183",
+          "set-cookie": "acw_tc=b3287fed-4c4e-9835-802d-a162a5fdbb7c30566ac83738c86e23c825617c59e60f;path=/;HttpOnly;Max-Age=1800",
+          "vary": "Origin,Access-Control-Request-Method,Access-Control-Request-Headers, Accept-Encoding",
+          "x-dashscope-call-gateway": "true",
+          "x-envoy-upstream-service-time": "232",
+          "x-ratelimit-limit-requests": "10",
+          "x-ratelimit-limit-tokens": "30000",
+          "x-ratelimit-remaining-requests": "2",
+          "x-ratelimit-remaining-tokens": "42000",
+          "x-ratelimit-reset-requests": "0s",
+          "x-ratelimit-reset-tokens": "0s",
+          "x-request-id": "b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+          "zg-res-key": "d821b7cd-8b23-4a4c-9186-4d9284fa432d"
+        },
+        "rawBodyBytes": 368,
+        "rawBodyPreview": "{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":\"Hello! How can I assist you today\"},\"finish_reason\":\"length\",\"index\":0,\"logprobs\":null}],\"object\":\"chat.completion\",\"usage\":{\"prompt_tokens\":9,\"completion_tokens\":8,\"total_tokens\":17},\"created\":1778143073,\"system_fingerprint\":null,\"model\":\"qwen2.5-7b-instruct\",\"id\":\"chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c\"}",
+        "parsedBody": {
+          "choices": [
+            {
+              "message": {
+                "role": "assistant",
+                "content": "Hello! How can I assist you today"
+              },
+              "finish_reason": "length",
+              "index": 0,
+              "logprobs": null
+            }
+          ],
+          "object": "chat.completion",
+          "usage": {
+            "prompt_tokens": 9,
+            "completion_tokens": 8,
+            "total_tokens": 17
+          },
+          "created": 1778143073,
+          "system_fingerprint": null,
+          "model": "qwen2.5-7b-instruct",
+          "id": "chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c"
+        },
+        "chatId": "chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+        "assistantContent": "Hello! How can I assist you today",
+        "tokenUsage": {
+          "prompt_tokens": 9,
+          "completion_tokens": 8,
+          "total_tokens": 17
+        },
+        "signatureLocations": {},
+        "signatureValid": null,
+        "verifyError": "getting signature error",
+        "signatureDownloadUrl": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/d821b7cd-8b23-4a4c-9186-4d9284fa432d",
+        "signatureFetchAttempts": [
+          {
+            "attempt": 1,
+            "afterDelayMs": 0,
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "status": 400,
+            "contentType": "application/json; charset=utf-8",
+            "bodyBytes": 121,
+            "bodyPreview": "{\"error\":\"Provider proxy: handle proxied service, prepare HTTP request: Chat id not found or expired, chat_id_not_found\"}",
+            "parsed": {
+              "error": "Provider proxy: handle proxied service, prepare HTTP request: Chat id not found or expired, chat_id_not_found"
+            },
+            "idFormat": "sdk-generated"
+          },
+          {
+            "attempt": 2,
+            "afterDelayMs": 5000,
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "status": 400,
+            "contentType": "application/json; charset=utf-8",
+            "bodyBytes": 121,
+            "bodyPreview": "{\"error\":\"Provider proxy: handle proxied service, prepare HTTP request: Chat id not found or expired, chat_id_not_found\"}",
+            "parsed": {
+              "error": "Provider proxy: handle proxied service, prepare HTTP request: Chat id not found or expired, chat_id_not_found"
+            },
+            "idFormat": "sdk-generated"
+          },
+          {
+            "attempt": 3,
+            "afterDelayMs": 0,
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "status": 400,
+            "contentType": "application/json; charset=utf-8",
+            "bodyBytes": 121,
+            "bodyPreview": "{\"error\":\"Provider proxy: handle proxied service, prepare HTTP request: Chat id not found or expired, chat_id_not_found\"}",
+            "parsed": {
+              "error": "Provider proxy: handle proxied service, prepare HTTP request: Chat id not found or expired, chat_id_not_found"
+            },
+            "idFormat": "full-chatId"
+          },
+          {
+            "attempt": 4,
+            "afterDelayMs": 5000,
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "status": 400,
+            "contentType": "application/json; charset=utf-8",
+            "bodyBytes": 121,
+            "bodyPreview": "{\"error\":\"Provider proxy: handle proxied service, prepare HTTP request: Chat id not found or expired, chat_id_not_found\"}",
+            "parsed": {
+              "error": "Provider proxy: handle proxied service, prepare HTTP request: Chat id not found or expired, chat_id_not_found"
+            },
+            "idFormat": "full-chatId"
+          },
+          {
+            "attempt": 5,
+            "afterDelayMs": 0,
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "status": 400,
+            "contentType": "application/json; charset=utf-8",
+            "bodyBytes": 121,
+            "bodyPreview": "{\"error\":\"Provider proxy: handle proxied service, prepare HTTP request: Chat id not found or expired, chat_id_not_found\"}",
+            "parsed": {
+              "error": "Provider proxy: handle proxied service, prepare HTTP request: Chat id not found or expired, chat_id_not_found"
+            },
+            "idFormat": "bare-uuid"
+          },
+          {
+            "attempt": 6,
+            "afterDelayMs": 5000,
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "status": 400,
+            "contentType": "application/json; charset=utf-8",
+            "bodyBytes": 121,
+            "bodyPreview": "{\"error\":\"Provider proxy: handle proxied service, prepare HTTP request: Chat id not found or expired, chat_id_not_found\"}",
+            "parsed": {
+              "error": "Provider proxy: handle proxied service, prepare HTTP request: Chat id not found or expired, chat_id_not_found"
+            },
+            "idFormat": "bare-uuid"
+          },
+          {
+            "attempt": 7,
+            "afterDelayMs": 0,
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/d821b7cd-8b23-4a4c-9186-4d9284fa432d",
+            "status": 200,
+            "contentType": "application/json; charset=utf-8",
+            "bodyBytes": 606,
+            "bodyPreview": "{\"text\":\"6c4d35f957e407ef8cb72b990d5436571c19b54a96028896e07ab9c1787b5d5b:35d56393fb54f5c2a1ec6a7a6f7e58db13280a89deb8efa0cfd8e1a5d103f238:centralized:aliyun:9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e\",\"signature\":\"0xf73b8b1ce8830df52cd4955775b95f021a22bd69020373c0d0a5e24543bc655918ed21eee418cec81c0e0bf64871e8489fa7ab996020b1f26fbc7a16039f91a91b\",\"signing_address\":\"0x83df4b8eba7c0b3b740019b8c9a77fff77d508cf\",\"signing_algo\":\"ecdsa\",\"provider_type\":\"centralized\",\"provider_identity\":\"aliyun\",\"tls_cert_fingerprint\":\"9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e\"}",
+            "parsed": {
+              "text": "6c4d35f957e407ef8cb72b990d5436571c19b54a96028896e07ab9c1787b5d5b:35d56393fb54f5c2a1ec6a7a6f7e58db13280a89deb8efa0cfd8e1a5d103f238:centralized:aliyun:9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e",
+              "signature": "0xf73b8b1ce8830df52cd4955775b95f021a22bd69020373c0d0a5e24543bc655918ed21eee418cec81c0e0bf64871e8489fa7ab996020b1f26fbc7a16039f91a91b",
+              "signing_address": "0x83df4b8eba7c0b3b740019b8c9a77fff77d508cf",
+              "signing_algo": "ecdsa",
+              "provider_type": "centralized",
+              "provider_identity": "aliyun",
+              "tls_cert_fingerprint": "9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e"
+            },
+            "idFormat": "zg-res-key"
+          }
+        ],
+        "signatureValidAfterDelay": null,
+        "verifyErrorAfterDelay": "getting signature error"
+      },
+      "observedShape": "{ status: 200, bodyBytes: 368, signatureValid: null, sigDownloadUrl: yes }",
+      "drift": [
+        {
+          "severity": "info",
+          "ours": {
+            "file": "packages/shared/src/index.ts",
+            "symbol": "AttributionReceipt.teeSignature",
+            "type": "string (assumed 65-byte ECDSA signature)"
+          },
+          "actual": {
+            "type": "(no signature surfaced in response — verification is async via processResponse + getChatSignatureDownloadLink)"
+          },
+          "note": "The TEE signature isn't returned inline. broker.inference.processResponse(provider, chatId, content) verifies it server-side; the raw signature must be fetched via broker.inference.getChatSignatureDownloadLink(provider, chatId). Our AttributionReceipt should store chatId + provider, not a raw signature."
+        }
+      ]
+    }
+  },
+  "driftReport": [
+    {
+      "severity": "critical",
+      "ours": {
+        "file": "services/runner/src/receipt-sink.ts",
+        "symbol": "DAReceiptSink",
+        "type": "throws 'pending 0G DA gRPC SDK'"
+      },
+      "actual": {
+        "type": "no working path found",
+        "value": null
+      },
+      "note": "None of the candidate paths returned 2xx. DA may not be live yet, or it expects a different protocol (gRPC). Inspect the per-path responses below.",
+      "probe": "da.submit"
+    },
+    {
+      "severity": "warning",
+      "ours": {
+        "file": "packages/shared/src/index.ts",
+        "symbol": "SettlementBatch.daCommitment",
+        "type": "`0x${string}` (bytes32)"
+      },
+      "actual": {
+        "type": "(no response)"
+      },
+      "note": "DA likely returns a KZG commitment + blob index, not a single bytes32. Schema may need a struct.",
+      "probe": "da.submit"
+    },
+    {
+      "severity": "info",
+      "ours": {
+        "file": "packages/shared/src/index.ts",
+        "symbol": "AttributionReceipt.teeSignature",
+        "type": "string (assumed 65-byte ECDSA signature)"
+      },
+      "actual": {
+        "type": "(no signature surfaced in response — verification is async via processResponse + getChatSignatureDownloadLink)"
+      },
+      "note": "The TEE signature isn't returned inline. broker.inference.processResponse(provider, chatId, content) verifies it server-side; the raw signature must be fetched via broker.inference.getChatSignatureDownloadLink(provider, chatId). Our AttributionReceipt should store chatId + provider, not a raw signature.",
+      "probe": "compute.invoke"
+    }
+  ]
+}

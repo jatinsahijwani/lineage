@@ -1,0 +1,33 @@
+{
+  "name": "@lineage/app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@lineage/sdk": "workspace:*",
+    "@lineage/shared": "workspace:*",
+    "@rainbow-me/rainbowkit": "^2.2.3",
+    "next": "14.2.28",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "viem": "^2.22.6",
+    "wagmi": "^2.14.11",
+    "zustand": "^5.0.3",
+    "@tanstack/react-query": "^5.74.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "@lineage/sdk",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/client.js",
+  "types": "./dist/client.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/client.js",
+      "types": "./dist/client.d.ts"
+    },
+    "./receipt.js": {
+      "import": "./dist/receipt.js",
+      "types": "./dist/receipt.d.ts"
+    },
+    "./lineage-graph.js": {
+      "import": "./dist/lineage-graph.js",
+      "types": "./dist/lineage-graph.d.ts"
+    },
+    "./middleware/openclaw.js": {
+      "import": "./dist/middleware/openclaw.js",
+      "types": "./dist/middleware/openclaw.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@lineage/crypto": "workspace:*",
+    "@lineage/shared": "workspace:*",
+    "cbor-x": "^1.6.0",
+    "viem": "^2.22.6",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

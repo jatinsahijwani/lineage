@@ -1,0 +1,26 @@
+{
+  "name": "lineage",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "test:contracts": "cd contracts && forge test -vv",
+    "deploy:testnet": "tsx scripts/deploy-testnet.ts",
+    "seed:testnet": "tsx scripts/seed-testnet.ts",
+    "e2e": "tsx --import ./scripts/libsodium-shim.mjs scripts/e2e-demo.ts",
+    "smoke": "node --experimental-strip-types --no-warnings scripts/smoke.ts"
+  },
+  "devDependencies": {
+    "@0gfoundation/0g-compute-ts-sdk": "^0.8.0",
+    "@0gfoundation/0g-storage-ts-sdk": "^1.2.9",
+    "@0glabs/0g-serving-broker": "^0.7.8",
+    "@types/node": "^20",
+    "cbor-x": "^1.6.0",
+    "ethers": "^6.16.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "viem": "^2.22.6"
+  }
+}

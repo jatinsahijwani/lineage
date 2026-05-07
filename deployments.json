@@ -1,0 +1,16 @@
+{
+  "testnet": {
+    "chainId": 16602,
+    "network": "0g-galileo-testnet",
+    "contracts": {
+      "LineageRegistry": "",
+      "DataINFT": "",
+      "ModelINFT": "",
+      "SkillINFT": "",
+      "RoyaltySplitter": "",
+      "AttributionVerifier": ""
+    },
+    "settlementOperator": "",
+    "deployedAt": ""
+  }
+}
