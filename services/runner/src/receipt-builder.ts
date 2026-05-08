@@ -90,6 +90,20 @@ export interface BuildAndPostParams {
   mockProviderIdentity?: string;
   /** Override the synthetic tls_cert_fingerprint (mock only). Defaults to 64 zero hex. */
   mockTlsCertFingerprint?: string;
+
+  /**
+   * Production path overrides for the receipt's top-level digest fields. When
+   * a real TEE attestation is supplied, the receipt's inputDigest /
+   * outputDigest MUST equal the first two ":"-separated fields of
+   * attestation.text — otherwise the step-6c digest-binding check fails. The
+   * TEE may canonicalize input/output bytes differently than a plain UTF-8
+   * sha256 (see services/runner/src/zg-compute.ts for the live probe), so the
+   * caller passes the TEE's claimed values through here. If omitted, the
+   * builder falls back to sha256(input) / sha256(output) (mock path behavior).
+   * Both must be 64-char lowercase hex with no 0x prefix.
+   */
+  inputDigestOverride?: string;
+  outputDigestOverride?: string;
 }
 
 function newReceiptId(): `0x${string}` {
@@ -139,10 +153,28 @@ export async function buildAndPostReceipt(
   sink: ReceiptSink,
 ): Promise<{ receipt: AttributionReceipt; daPointer: DAPointer }> {
   // -------------------------------------------------------------------------
-  // 1. Digests.
+  // 1. Digests. Production path: prefer the TEE-signed values via overrides
+  // (the TEE may canonicalize differently than plain UTF-8 sha256, and the
+  // receipt's digest fields must match attestation.text[0]/[1]). Mock /
+  // legacy path: sha256 the supplied input/output strings directly.
   // -------------------------------------------------------------------------
-  const inputDigest = await sha256Hex(new TextEncoder().encode(params.input));
-  const outputDigest = await sha256Hex(new TextEncoder().encode(params.output));
+  const HEX64_LOWER = /^[0-9a-f]{64}$/;
+  if (params.inputDigestOverride !== undefined && !HEX64_LOWER.test(params.inputDigestOverride)) {
+    throw new Error(
+      `inputDigestOverride must be 64-char lowercase hex (no 0x): ${params.inputDigestOverride}`,
+    );
+  }
+  if (params.outputDigestOverride !== undefined && !HEX64_LOWER.test(params.outputDigestOverride)) {
+    throw new Error(
+      `outputDigestOverride must be 64-char lowercase hex (no 0x): ${params.outputDigestOverride}`,
+    );
+  }
+  const inputDigest =
+    params.inputDigestOverride ??
+    (await sha256Hex(new TextEncoder().encode(params.input)));
+  const outputDigest =
+    params.outputDigestOverride ??
+    (await sha256Hex(new TextEncoder().encode(params.output)));
 
   // -------------------------------------------------------------------------
   // 2. TEE attestation (real or mock).

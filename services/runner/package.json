@@ -9,6 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@0gfoundation/0g-compute-ts-sdk": "^0.8.0",
     "@0gfoundation/0g-storage-ts-sdk": "^1.2.9",
     "@lineage/crypto": "workspace:*",
     "@lineage/sdk": "workspace:*",

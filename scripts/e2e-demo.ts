@@ -18,6 +18,12 @@
  *   anvil --port 8545
  */
 
+// E2E demo runs entirely on local anvil. Force the runner's mock-TEE path
+// before any module that reads MOCK_TEE at import time loads. The default
+// flipped from "mock if not set" to "real 0G Compute if not set" in gate 1
+// (see services/runner/README.md).
+process.env["MOCK_TEE"] = "1";
+
 import { execSync } from "node:child_process";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";

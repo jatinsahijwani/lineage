@@ -7,7 +7,8 @@ import { StorageReceiptSink, DAReceiptSink, type ReceiptSink } from "./receipt-s
 
 const config: InferenceConfig = {
   computeUrl: process.env["ZERO_G_COMPUTE_URL"] ?? "mock://compute",
-  mockTEE: process.env["MOCK_TEE"] !== "false",
+  // Real 0G Compute is the default; set MOCK_TEE=1 to bypass for offline tests.
+  mockTEE: process.env["MOCK_TEE"] === "1",
   teePublicKey: process.env["TEE_PUBLIC_KEY"] ?? "0x0000000000000000000000000000000000000000",
 };
 

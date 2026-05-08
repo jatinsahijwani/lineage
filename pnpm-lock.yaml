@@ -147,6 +147,9 @@ importers:
 
   services/runner:
     dependencies:
+      '@0gfoundation/0g-compute-ts-sdk':
+        specifier: ^0.8.0
+        version: 0.8.0(@types/circomlibjs@0.1.6)(@types/crypto-js@4.2.2)(circomlibjs@0.1.7(bufferutil@4.1.0)(utf-8-validate@5.0.10))(crypto-js@4.2.0)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))
       '@0gfoundation/0g-storage-ts-sdk':
         specifier: ^1.2.9
         version: 1.2.9(bufferutil@4.1.0)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))(utf-8-validate@5.0.10)
