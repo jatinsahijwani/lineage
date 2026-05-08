@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-05-07T08:38:09.584Z",
+  "ranAt": "2026-05-08T09:23:12.756Z",
   "endpoints": {
     "rpc": "https://evmrpc-testnet.0g.ai",
     "storage": "https://indexer-storage-testnet-turbo.0g.ai",
@@ -12,8 +12,8 @@
   "summary": {
     "total": 10,
     "ok": 9,
-    "failed": 0,
-    "skipped": 1,
+    "failed": 1,
+    "skipped": 0,
     "critical": 1,
     "warnings": 1,
     "infos": 1
@@ -23,7 +23,7 @@
       "name": "chain.getChainId",
       "primitive": "chain",
       "ok": true,
-      "durationMs": 802,
+      "durationMs": 764,
       "request": {
         "method": "eth_chainId",
         "args": {}
@@ -36,12 +36,12 @@
       "name": "chain.getBlockNumber",
       "primitive": "chain",
       "ok": true,
-      "durationMs": 716,
+      "durationMs": 984,
       "request": {
         "method": "eth_blockNumber",
         "args": {}
       },
-      "response": "32012075n",
+      "response": "32193462n",
       "observedShape": "bigint",
       "drift": []
     },
@@ -49,7 +49,7 @@
       "name": "chain.getBalance",
       "primitive": "chain",
       "ok": true,
-      "durationMs": 247,
+      "durationMs": 241,
       "request": {
         "method": "eth_getBalance",
         "args": {
@@ -58,7 +58,7 @@
       },
       "response": {
         "address": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
-        "wei": "12586723343373961677n"
+        "wei": "12554693985850620485n"
       },
       "observedShape": "{ address: hex(20B), wei: bigint }",
       "drift": []
@@ -67,34 +67,39 @@
       "name": "chain.readContract",
       "primitive": "chain",
       "ok": false,
-      "durationMs": 0,
+      "durationMs": 348,
       "request": {
-        "method": "(skipped)",
-        "args": null
+        "method": "getINFT",
+        "args": {
+          "tokenId": "1n",
+          "address": "0x5Ba9010bf4A6E13F098d1ce5DBAF52c22E21B3f5"
+        }
       },
       "response": null,
       "observedShape": "",
-      "drift": [],
-      "skipped": {
-        "reason": "no LineageRegistry in deployments.json — run pnpm deploy:testnet first"
-      }
+      "error": {
+        "name": "ContractFunctionExecutionError",
+        "message": "The contract function \"getINFT\" reverted with the following reason:\nnot registered\n\nContract Call:\n  address:   0x5Ba9010bf4A6E13F098d1ce5DBAF52c22E21B3f5\n  function:  getINFT(uint256 tokenId)\n  args:             (1)\n\nDocs: https://viem.sh/docs/contract/readContract\nDetails: execution reverted: not registered\nVersion: viem@2.48.8",
+        "stack": "ContractFunctionExecutionError: The contract function \"getINFT\" reverted with the following reason:\nnot registered\n\nContract Call:\n  address:   0x5Ba9010bf4A6E13F098d1ce5DBAF52c22E21B3f5\n  function:  getINFT(uint256 tokenId)\n  args:             (1)\n\nDocs: https://viem.sh/docs/contract/readContract\nDetails: execution reverted: not registered\nVersion: viem@2.48.8\n    at getContractError (file:///Users/jatinsahijwani/Desktop/lineage/node_modules/.pnpm/viem@2.48.8_bufferutil@4.1.0_typescript@5.9.3_utf-8-validate@5.0.10_zod@4.4.3/node_modules/viem/_esm/utils/errors/getContractError.js:34:12)\n    at readContract (file:///Users/jatinsahijwani/Desktop/lineage/node_modules/.pnpm/viem@2.48.8_bufferutil@4.1.0_typescript@5.9.3_utf-8-validate@5.0.10_zod@4.4.3/node_modules/viem/_esm/actions/public/readContract.js:58:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async file:///Users/jatinsahijwani/Desktop/lineage/scripts/smoke.ts:361:24\n    at async runProbe (file:///Users/jatinsahijwani/Desktop/lineage/scripts/smoke.ts:100:48)\n    at async chainProbes (file:///Users/jatinsahijwani/Desktop/lineage/scripts/smoke.ts:335:5)\n    at async main (file:///Users/jatinsahijwani/Desktop/lineage/scripts/smoke.ts:1022:3)"
+      },
+      "drift": []
     },
     "storage.upload": {
       "name": "storage.upload",
       "primitive": "storage",
       "ok": true,
-      "durationMs": 13446,
+      "durationMs": 15002,
       "request": {
         "method": "Indexer.upload",
         "args": {
           "blobBytes": 120,
-          "tag": "lineage-smoke-2026-05-07T08:37:31.931Z"
+          "tag": "lineage-smoke-2026-05-08T09:22:31.789Z"
         }
       },
       "response": {
-        "txHash": "0xd6ab21d460c3a72420f9bee4f75c6aed3002471bdf57d8cd65f9be745004d01c",
-        "rootHash": "0xe8d8a76caabd0bbed3e4fb15dbe681eda112e923d46ac7990e3d9aa3491802ae",
-        "txSeq": 92438
+        "txHash": "0x048fb50b2fc51abef91d2358393a67694a5f84a933db080344b3afb63eff1d73",
+        "rootHash": "0xb607a3e44628630d54981dec4c226fa9a0499258fe80a48a27bc642438cbad63",
+        "txSeq": 96231
       },
       "observedShape": "{ txHash: hex(32B), rootHash: hex(32B), txSeq: number }",
       "drift": []
@@ -103,16 +108,16 @@
       "name": "storage.download",
       "primitive": "storage",
       "ok": true,
-      "durationMs": 2347,
+      "durationMs": 1746,
       "request": {
         "method": "Indexer.downloadToBlob",
         "args": {
-          "rootHash": "0xe8d8a76caabd0bbed3e4fb15dbe681eda112e923d46ac7990e3d9aa3491802ae"
+          "rootHash": "0xb607a3e44628630d54981dec4c226fa9a0499258fe80a48a27bc642438cbad63"
         }
       },
       "response": {
         "sizeBytes": 120,
-        "recoveredTag": "lineage-smoke-2026-05-07T08:37:31.931Z",
+        "recoveredTag": "lineage-smoke-2026-05-08T09:22:31.789Z",
         "matches": true
       },
       "observedShape": "Blob(120B)",
@@ -122,7 +127,7 @@
       "name": "da.submit",
       "primitive": "da",
       "ok": true,
-      "durationMs": 457,
+      "durationMs": 936,
       "request": {
         "method": "POST",
         "args": {
@@ -133,7 +138,7 @@
             "/da/v1/blob",
             "/"
           ],
-          "payloadBytes": 497
+          "payloadBytes": 772
         }
       },
       "response": {
@@ -142,21 +147,21 @@
             "path": "/disperser/disperse_blob",
             "status": 404,
             "contentType": "text/plain; charset=utf-8",
-            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::92w67-1778143068059-4888b8b37106\n",
+            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::5d4fs-1778232168756-5aa05ee150d6\n",
             "bodyLen": 79
           },
           {
             "path": "/v1/blob",
             "status": 404,
             "contentType": "text/plain; charset=utf-8",
-            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::5dbqn-1778143068173-35156db7d6a3\n",
+            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::5xgbs-1778232169122-c6b998f51a55\n",
             "bodyLen": 79
           },
           {
             "path": "/da/v1/blob",
             "status": 404,
             "contentType": "text/plain; charset=utf-8",
-            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::m8msb-1778143068218-f87c91d6a807\n",
+            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::j2t4b-1778232169447-b2edec4c5d86\n",
             "bodyLen": 79
           },
           {
@@ -187,14 +192,14 @@
         {
           "severity": "warning",
           "ours": {
-            "file": "packages/shared/src/index.ts",
-            "symbol": "SettlementBatch.daCommitment",
-            "type": "`0x${string}` (bytes32)"
+            "file": "contracts/src/interfaces/IRoyaltySplitter.sol",
+            "symbol": "SettlementBatch.daPointer",
+            "type": "DAPointer { bytes32 commitment; uint64 blobIndex; }"
           },
           "actual": {
             "type": "(no response)"
           },
-          "note": "DA likely returns a KZG commitment + blob index, not a single bytes32. Schema may need a struct."
+          "note": "Confirm the real DA response carries both a 32-byte commitment and a sequential blob index. If DA returns only a KZG commitment, blobIndex will need to be derived elsewhere."
         }
       ]
     },
@@ -202,7 +207,7 @@
       "name": "compute.listServices",
       "primitive": "compute",
       "ok": true,
-      "durationMs": 983,
+      "durationMs": 1200,
       "request": {
         "method": "createReadOnlyInferenceBroker(rpc).listService",
         "args": {
@@ -214,9 +219,9 @@
           "0xa48f01287233509FD694a22Bf840225062E67836",
           "chatbot",
           "https://compute-network-6.integratenetwork.work",
-          "50000000000n",
-          "100000000000n",
-          "1777372525n",
+          "310000000000n",
+          "1240000000000n",
+          "1778212340n",
           "qwen/qwen-2.5-7b-instruct",
           "TeeML",
           "{\"ImageDigest\":\"\",\"ImageName\":\"\",\"ProviderIdentity\":\"aliyun\",\"ProviderType\":\"centralized\",\"TEEVerifier\":\"dstack\",\"TargetSeparated\":true,\"TargetTeeAddress\":\"\",\"VerifierURL\":\"https://github.com/Dstack-TEE/dstack/releases/tag/verifier-v0.5.8\"}",
@@ -256,12 +261,12 @@
         "model": "qwen/qwen-2.5-7b-instruct",
         "serviceType": "chatbot",
         "url": "https://compute-network-6.integratenetwork.work",
-        "inputPrice": "50000000000",
-        "outputPrice": "100000000000",
+        "inputPrice": "310000000000",
+        "outputPrice": "1240000000000",
         "verifiability": "TeeML",
         "teeSignerAddress": "0x83df4B8EbA7c0B3B740019b8c9a77ffF77D508cF",
         "teeSignerAcknowledged": true,
-        "updatedAt": "1777372525"
+        "updatedAt": "1778212340"
       },
       "observedShape": "[hex(20B)×11]",
       "drift": []
@@ -270,7 +275,7 @@
       "name": "compute.invoke",
       "primitive": "compute",
       "ok": true,
-      "durationMs": 20415,
+      "durationMs": 22075,
       "request": {
         "method": "POST {endpoint}/v1/chat/completions",
         "args": {
@@ -296,7 +301,7 @@
           "model": "qwen/qwen-2.5-7b-instruct"
         },
         "requestHeaders": {
-          "Authorization": "Bearer app-sk-eyJhZGRyZXNzIjoiMHhiYzc0Q2U1MTIzOUYwMTY1QzkzMUQ3MjQ2NGJCYmY4MzYwYWVBMEMzIiwicHJvdmlkZXIiOiIweGE0OGYwMTI4NzIzMzUwOUZENjk0YTIyQmY4NDAyMjUwNjJFNjc4MzYiLCJ0aW1lc3RhbXAiOjE3NzgxNDMwNzExODcsImV4cGlyZXNBdCI6MTc3ODIyOTQ3MTE4Nywibm9uY2UiOiIxNzc4MTQzMDcxMTg3LWg0a25tbThwOXNlMDAwMDAwMCIsImdlbmVyYXRpb24iOjAsInRva2VuSWQiOjI1NX18MHg4Y2FjZDcxNjRiMDYwZDhlOTI2ZGEzNmJmMDNjNTcyNWU4MTYxYTk4YTMwMTgyMWY3MjlhNjUxNjRiYTVkMDJjNGVlNDgxNTJjZWIxYTg2MTFkMWQxMmI4ZTU2ZGM1NjJhNDA3NzgxMzAxNWI5YzMxZDM2MzM4ZGNiMDFmMzUzYzFi"
+          "Authorization": "Bearer app-sk-eyJhZGRyZXNzIjoiMHhiYzc0Q2U1MTIzOUYwMTY1QzkzMUQ3MjQ2NGJCYmY4MzYwYWVBMEMzIiwicHJvdmlkZXIiOiIweGE0OGYwMTI4NzIzMzUwOUZENjk0YTIyQmY4NDAyMjUwNjJFNjc4MzYiLCJ0aW1lc3RhbXAiOjE3NzgyMzIxNzMwODcsImV4cGlyZXNBdCI6MTc3ODMxODU3MzA4Nywibm9uY2UiOiIxNzc4MjMyMTczMDg3LXN2Y2FwazljcjFqMDAwMDAwMCIsImdlbmVyYXRpb24iOjAsInRva2VuSWQiOjI1NX18MHg0ODI2MWFlNzc3MWNlOWRkOTgwNmYwMGM5MDYyYWMzYzA3YzY4NWI5NmEyYTYxNzIwMWY4M2QzOGJjMTMxNDMyMTkwYjQ4NTU3N2Q1ODUyMTA0MWFlYTdjYzhmYTBjYzU2ZmViZDk0MzFkNmQ1Yzk2ZGY4YzEyZTQ0OGNkZTU3NjFi"
         },
         "requestBody": {
           "messages": [
@@ -310,35 +315,34 @@
           "temperature": 0
         },
         "httpStatus": 200,
-        "usedPath": "/chat/completions",
+        "usedPath": "/v1/chat/completions",
         "responseHeaders": {
-          "connection": "keep-alive",
-          "content-length": "281",
-          "content-type": "application/json",
-          "date": "Thu, 07 May 2026 08:37:53 GMT",
-          "server": "nginx/1.27.4",
-          "__failed_/v1/chat/completions_status": "400",
           "access-control-expose-headers": "x-ratelimit-limit-requests, x-ratelimit-remaining-requests, x-ratelimit-reset-requests, x-ratelimit-limit-tokens, x-ratelimit-remaining-tokens, x-ratelimit-reset-tokens,Provider,content-encoding,ZG-Res-Key",
+          "connection": "keep-alive",
           "content-encoding": "gzip",
+          "content-length": "279",
+          "content-type": "application/json",
+          "date": "Fri, 08 May 2026 09:22:56 GMT",
           "provider": "0xa48f01287233509FD694a22Bf840225062E67836",
-          "req-arrive-time": "1778143072950",
-          "req-cost-time": "233",
-          "resp-start-time": "1778143073183",
-          "set-cookie": "acw_tc=b3287fed-4c4e-9835-802d-a162a5fdbb7c30566ac83738c86e23c825617c59e60f;path=/;HttpOnly;Max-Age=1800",
+          "req-arrive-time": "1778232175842",
+          "req-cost-time": "235",
+          "resp-start-time": "1778232176078",
+          "server": "nginx/1.27.4",
+          "set-cookie": "acw_tc=90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb3165801d3541add38dbd927ac6613285;path=/;HttpOnly;Max-Age=1800",
           "vary": "Origin,Access-Control-Request-Method,Access-Control-Request-Headers, Accept-Encoding",
           "x-dashscope-call-gateway": "true",
-          "x-envoy-upstream-service-time": "232",
+          "x-envoy-upstream-service-time": "235",
           "x-ratelimit-limit-requests": "10",
           "x-ratelimit-limit-tokens": "30000",
           "x-ratelimit-remaining-requests": "2",
           "x-ratelimit-remaining-tokens": "42000",
           "x-ratelimit-reset-requests": "0s",
           "x-ratelimit-reset-tokens": "0s",
-          "x-request-id": "b3287fed-4c4e-9835-802d-a162a5fdbb7c",
-          "zg-res-key": "d821b7cd-8b23-4a4c-9186-4d9284fa432d"
+          "x-request-id": "90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
+          "zg-res-key": "f5be2307-d315-487f-a7c5-d4a75d0f4225"
         },
         "rawBodyBytes": 368,
-        "rawBodyPreview": "{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":\"Hello! How can I assist you today\"},\"finish_reason\":\"length\",\"index\":0,\"logprobs\":null}],\"object\":\"chat.completion\",\"usage\":{\"prompt_tokens\":9,\"completion_tokens\":8,\"total_tokens\":17},\"created\":1778143073,\"system_fingerprint\":null,\"model\":\"qwen2.5-7b-instruct\",\"id\":\"chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c\"}",
+        "rawBodyPreview": "{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":\"Hello! How can I assist you today\"},\"finish_reason\":\"length\",\"index\":0,\"logprobs\":null}],\"object\":\"chat.completion\",\"usage\":{\"prompt_tokens\":9,\"completion_tokens\":8,\"total_tokens\":17},\"created\":1778232176,\"system_fingerprint\":null,\"model\":\"qwen2.5-7b-instruct\",\"id\":\"chatcmpl-90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb\"}",
         "parsedBody": {
           "choices": [
             {
@@ -357,12 +361,12 @@
             "completion_tokens": 8,
             "total_tokens": 17
           },
-          "created": 1778143073,
+          "created": 1778232176,
           "system_fingerprint": null,
           "model": "qwen2.5-7b-instruct",
-          "id": "chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c"
+          "id": "chatcmpl-90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb"
         },
-        "chatId": "chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+        "chatId": "chatcmpl-90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
         "assistantContent": "Hello! How can I assist you today",
         "tokenUsage": {
           "prompt_tokens": 9,
@@ -372,12 +376,12 @@
         "signatureLocations": {},
         "signatureValid": null,
         "verifyError": "getting signature error",
-        "signatureDownloadUrl": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/d821b7cd-8b23-4a4c-9186-4d9284fa432d",
+        "signatureDownloadUrl": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/f5be2307-d315-487f-a7c5-d4a75d0f4225",
         "signatureFetchAttempts": [
           {
             "attempt": 1,
             "afterDelayMs": 0,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -390,7 +394,7 @@
           {
             "attempt": 2,
             "afterDelayMs": 5000,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -403,7 +407,7 @@
           {
             "attempt": 3,
             "afterDelayMs": 0,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -416,7 +420,7 @@
           {
             "attempt": 4,
             "afterDelayMs": 5000,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -429,7 +433,7 @@
           {
             "attempt": 5,
             "afterDelayMs": 0,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -442,7 +446,7 @@
           {
             "attempt": 6,
             "afterDelayMs": 5000,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -455,14 +459,14 @@
           {
             "attempt": 7,
             "afterDelayMs": 0,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/d821b7cd-8b23-4a4c-9186-4d9284fa432d",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/f5be2307-d315-487f-a7c5-d4a75d0f4225",
             "status": 200,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 606,
-            "bodyPreview": "{\"text\":\"6c4d35f957e407ef8cb72b990d5436571c19b54a96028896e07ab9c1787b5d5b:35d56393fb54f5c2a1ec6a7a6f7e58db13280a89deb8efa0cfd8e1a5d103f238:centralized:aliyun:9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e\",\"signature\":\"0xf73b8b1ce8830df52cd4955775b95f021a22bd69020373c0d0a5e24543bc655918ed21eee418cec81c0e0bf64871e8489fa7ab996020b1f26fbc7a16039f91a91b\",\"signing_address\":\"0x83df4b8eba7c0b3b740019b8c9a77fff77d508cf\",\"signing_algo\":\"ecdsa\",\"provider_type\":\"centralized\",\"provider_identity\":\"aliyun\",\"tls_cert_fingerprint\":\"9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e\"}",
+            "bodyPreview": "{\"text\":\"6c4d35f957e407ef8cb72b990d5436571c19b54a96028896e07ab9c1787b5d5b:412b4fcbedefa568d6fb8ae341efabbd4786c1abde9f0629c41078099f51c0db:centralized:aliyun:9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e\",\"signature\":\"0x83e7e76c2c70301ac5d4962552bdc55c4c2fbfad30943cb7b54119f63602a3bf0504b03804088a5beb643bf6a0b8cbd6aea40a25fd55a123a51477a4189324c71c\",\"signing_address\":\"0x83df4b8eba7c0b3b740019b8c9a77fff77d508cf\",\"signing_algo\":\"ecdsa\",\"provider_type\":\"centralized\",\"provider_identity\":\"aliyun\",\"tls_cert_fingerprint\":\"9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e\"}",
             "parsed": {
-              "text": "6c4d35f957e407ef8cb72b990d5436571c19b54a96028896e07ab9c1787b5d5b:35d56393fb54f5c2a1ec6a7a6f7e58db13280a89deb8efa0cfd8e1a5d103f238:centralized:aliyun:9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e",
-              "signature": "0xf73b8b1ce8830df52cd4955775b95f021a22bd69020373c0d0a5e24543bc655918ed21eee418cec81c0e0bf64871e8489fa7ab996020b1f26fbc7a16039f91a91b",
+              "text": "6c4d35f957e407ef8cb72b990d5436571c19b54a96028896e07ab9c1787b5d5b:412b4fcbedefa568d6fb8ae341efabbd4786c1abde9f0629c41078099f51c0db:centralized:aliyun:9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e",
+              "signature": "0x83e7e76c2c70301ac5d4962552bdc55c4c2fbfad30943cb7b54119f63602a3bf0504b03804088a5beb643bf6a0b8cbd6aea40a25fd55a123a51477a4189324c71c",
               "signing_address": "0x83df4b8eba7c0b3b740019b8c9a77fff77d508cf",
               "signing_algo": "ecdsa",
               "provider_type": "centralized",
@@ -481,13 +485,13 @@
           "severity": "info",
           "ours": {
             "file": "packages/shared/src/index.ts",
-            "symbol": "AttributionReceipt.teeSignature",
-            "type": "string (assumed 65-byte ECDSA signature)"
+            "symbol": "AttributionReceipt.computeProof.attestation",
+            "type": "TEEAttestation { text, signature, signing_address, ... } (populated lazily)"
           },
           "actual": {
             "type": "(no signature surfaced in response — verification is async via processResponse + getChatSignatureDownloadLink)"
           },
-          "note": "The TEE signature isn't returned inline. broker.inference.processResponse(provider, chatId, content) verifies it server-side; the raw signature must be fetched via broker.inference.getChatSignatureDownloadLink(provider, chatId). Our AttributionReceipt should store chatId + provider, not a raw signature."
+          "note": "The TEE signature isn't returned inline. broker.inference.processResponse(provider, chatId, content) verifies it server-side; the raw signature must be fetched via broker.inference.getChatSignatureDownloadLink(provider, chatId). AttributionReceipt stores chatId + provider in computeProof; the attestation field is hydrated once the async signature is available."
         }
       ]
     }
@@ -510,27 +514,27 @@
     {
       "severity": "warning",
       "ours": {
-        "file": "packages/shared/src/index.ts",
-        "symbol": "SettlementBatch.daCommitment",
-        "type": "`0x${string}` (bytes32)"
+        "file": "contracts/src/interfaces/IRoyaltySplitter.sol",
+        "symbol": "SettlementBatch.daPointer",
+        "type": "DAPointer { bytes32 commitment; uint64 blobIndex; }"
       },
       "actual": {
         "type": "(no response)"
       },
-      "note": "DA likely returns a KZG commitment + blob index, not a single bytes32. Schema may need a struct.",
+      "note": "Confirm the real DA response carries both a 32-byte commitment and a sequential blob index. If DA returns only a KZG commitment, blobIndex will need to be derived elsewhere.",
       "probe": "da.submit"
     },
     {
       "severity": "info",
       "ours": {
         "file": "packages/shared/src/index.ts",
-        "symbol": "AttributionReceipt.teeSignature",
-        "type": "string (assumed 65-byte ECDSA signature)"
+        "symbol": "AttributionReceipt.computeProof.attestation",
+        "type": "TEEAttestation { text, signature, signing_address, ... } (populated lazily)"
       },
       "actual": {
         "type": "(no signature surfaced in response — verification is async via processResponse + getChatSignatureDownloadLink)"
       },
-      "note": "The TEE signature isn't returned inline. broker.inference.processResponse(provider, chatId, content) verifies it server-side; the raw signature must be fetched via broker.inference.getChatSignatureDownloadLink(provider, chatId). Our AttributionReceipt should store chatId + provider, not a raw signature.",
+      "note": "The TEE signature isn't returned inline. broker.inference.processResponse(provider, chatId, content) verifies it server-side; the raw signature must be fetched via broker.inference.getChatSignatureDownloadLink(provider, chatId). AttributionReceipt stores chatId + provider in computeProof; the attestation field is hydrated once the async signature is available.",
       "probe": "compute.invoke"
     }
   ]
