@@ -7,10 +7,12 @@
  * Requires: PRIVATE_KEY and contract addresses in .env
  */
 
-import { createWalletClient, http, privateKeyToAccount } from "viem";
+ import "dotenv/config";
+import { createWalletClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import { LineageClient } from "../packages/sdk/src/client.js";
 import { zeroGTestnet } from "../app/lib/wagmi.js";
-import deployments from "../deployments.json" assert { type: "json" };
+import deployments from "../deployments.json" with { type: "json" };
 
 const pk = (process.env["PRIVATE_KEY"] ?? "") as `0x${string}`;
 if (!pk || pk === "0x") {

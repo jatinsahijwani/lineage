@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-05-08T09:23:12.756Z",
+  "ranAt": "2026-05-08T11:31:09.873Z",
   "endpoints": {
     "rpc": "https://evmrpc-testnet.0g.ai",
     "storage": "https://indexer-storage-testnet-turbo.0g.ai",
@@ -11,8 +11,8 @@
   },
   "summary": {
     "total": 10,
-    "ok": 9,
-    "failed": 1,
+    "ok": 10,
+    "failed": 0,
     "skipped": 0,
     "critical": 1,
     "warnings": 1,
@@ -23,7 +23,7 @@
       "name": "chain.getChainId",
       "primitive": "chain",
       "ok": true,
-      "durationMs": 764,
+      "durationMs": 795,
       "request": {
         "method": "eth_chainId",
         "args": {}
@@ -36,12 +36,12 @@
       "name": "chain.getBlockNumber",
       "primitive": "chain",
       "ok": true,
-      "durationMs": 984,
+      "durationMs": 748,
       "request": {
         "method": "eth_blockNumber",
         "args": {}
       },
-      "response": "32193462n",
+      "response": "32208847n",
       "observedShape": "bigint",
       "drift": []
     },
@@ -49,7 +49,7 @@
       "name": "chain.getBalance",
       "primitive": "chain",
       "ok": true,
-      "durationMs": 241,
+      "durationMs": 248,
       "request": {
         "method": "eth_getBalance",
         "args": {
@@ -58,7 +58,7 @@
       },
       "response": {
         "address": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
-        "wei": "12554693985850620485n"
+        "wei": "12547452183104302422n"
       },
       "observedShape": "{ address: hex(20B), wei: bigint }",
       "drift": []
@@ -66,8 +66,8 @@
     "chain.readContract": {
       "name": "chain.readContract",
       "primitive": "chain",
-      "ok": false,
-      "durationMs": 348,
+      "ok": true,
+      "durationMs": 279,
       "request": {
         "method": "getINFT",
         "args": {
@@ -75,31 +75,35 @@
           "address": "0x5Ba9010bf4A6E13F098d1ce5DBAF52c22E21B3f5"
         }
       },
-      "response": null,
-      "observedShape": "",
-      "error": {
-        "name": "ContractFunctionExecutionError",
-        "message": "The contract function \"getINFT\" reverted with the following reason:\nnot registered\n\nContract Call:\n  address:   0x5Ba9010bf4A6E13F098d1ce5DBAF52c22E21B3f5\n  function:  getINFT(uint256 tokenId)\n  args:             (1)\n\nDocs: https://viem.sh/docs/contract/readContract\nDetails: execution reverted: not registered\nVersion: viem@2.48.8",
-        "stack": "ContractFunctionExecutionError: The contract function \"getINFT\" reverted with the following reason:\nnot registered\n\nContract Call:\n  address:   0x5Ba9010bf4A6E13F098d1ce5DBAF52c22E21B3f5\n  function:  getINFT(uint256 tokenId)\n  args:             (1)\n\nDocs: https://viem.sh/docs/contract/readContract\nDetails: execution reverted: not registered\nVersion: viem@2.48.8\n    at getContractError (file:///Users/jatinsahijwani/Desktop/lineage/node_modules/.pnpm/viem@2.48.8_bufferutil@4.1.0_typescript@5.9.3_utf-8-validate@5.0.10_zod@4.4.3/node_modules/viem/_esm/utils/errors/getContractError.js:34:12)\n    at readContract (file:///Users/jatinsahijwani/Desktop/lineage/node_modules/.pnpm/viem@2.48.8_bufferutil@4.1.0_typescript@5.9.3_utf-8-validate@5.0.10_zod@4.4.3/node_modules/viem/_esm/actions/public/readContract.js:58:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async file:///Users/jatinsahijwani/Desktop/lineage/scripts/smoke.ts:361:24\n    at async runProbe (file:///Users/jatinsahijwani/Desktop/lineage/scripts/smoke.ts:100:48)\n    at async chainProbes (file:///Users/jatinsahijwani/Desktop/lineage/scripts/smoke.ts:335:5)\n    at async main (file:///Users/jatinsahijwani/Desktop/lineage/scripts/smoke.ts:1022:3)"
+      "response": {
+        "tokenId": "1n",
+        "storageRoot": "0x9b6cb93ff78d19dfdec9e2d074c5cf4b2f61296a8b77755e6b9a89be117f9731",
+        "owner": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
+        "iType": 0,
+        "royaltyBps": 200,
+        "royaltyReceiver": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
+        "createdAt": "1778239748n",
+        "paused": false
       },
+      "observedShape": "{ tokenId: bigint, storageRoot: hex(32B), owner: hex(20B), iType: number, royaltyBps: number, royaltyReceiver: hex(20B), createdAt: bigint, paused: boolean }",
       "drift": []
     },
     "storage.upload": {
       "name": "storage.upload",
       "primitive": "storage",
       "ok": true,
-      "durationMs": 15002,
+      "durationMs": 13035,
       "request": {
         "method": "Indexer.upload",
         "args": {
           "blobBytes": 120,
-          "tag": "lineage-smoke-2026-05-08T09:22:31.789Z"
+          "tag": "lineage-smoke-2026-05-08T11:30:31.077Z"
         }
       },
       "response": {
-        "txHash": "0x048fb50b2fc51abef91d2358393a67694a5f84a933db080344b3afb63eff1d73",
-        "rootHash": "0xb607a3e44628630d54981dec4c226fa9a0499258fe80a48a27bc642438cbad63",
-        "txSeq": 96231
+        "txHash": "0x03b44a8c13bb23cf2e7fb129907c3ced9d9f625c9378fe1bf959ae1833ceebaf",
+        "rootHash": "0x734f3b034b5a88f12f79a2e59de3ed3bd7784235e9eb7e925131ee5ec2c17319",
+        "txSeq": 96515
       },
       "observedShape": "{ txHash: hex(32B), rootHash: hex(32B), txSeq: number }",
       "drift": []
@@ -108,16 +112,16 @@
       "name": "storage.download",
       "primitive": "storage",
       "ok": true,
-      "durationMs": 1746,
+      "durationMs": 2701,
       "request": {
         "method": "Indexer.downloadToBlob",
         "args": {
-          "rootHash": "0xb607a3e44628630d54981dec4c226fa9a0499258fe80a48a27bc642438cbad63"
+          "rootHash": "0x734f3b034b5a88f12f79a2e59de3ed3bd7784235e9eb7e925131ee5ec2c17319"
         }
       },
       "response": {
         "sizeBytes": 120,
-        "recoveredTag": "lineage-smoke-2026-05-08T09:22:31.789Z",
+        "recoveredTag": "lineage-smoke-2026-05-08T11:30:31.077Z",
         "matches": true
       },
       "observedShape": "Blob(120B)",
@@ -127,7 +131,7 @@
       "name": "da.submit",
       "primitive": "da",
       "ok": true,
-      "durationMs": 936,
+      "durationMs": 733,
       "request": {
         "method": "POST",
         "args": {
@@ -147,21 +151,21 @@
             "path": "/disperser/disperse_blob",
             "status": 404,
             "contentType": "text/plain; charset=utf-8",
-            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::5d4fs-1778232168756-5aa05ee150d6\n",
+            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::trdmx-1778239847107-6f660dffd773\n",
             "bodyLen": 79
           },
           {
             "path": "/v1/blob",
             "status": 404,
             "contentType": "text/plain; charset=utf-8",
-            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::5xgbs-1778232169122-c6b998f51a55\n",
+            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::jk97k-1778239847390-2aa5d7f1da2d\n",
             "bodyLen": 79
           },
           {
             "path": "/da/v1/blob",
             "status": 404,
             "contentType": "text/plain; charset=utf-8",
-            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::j2t4b-1778232169447-b2edec4c5d86\n",
+            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::p55ts-1778239847463-13c565ccb504\n",
             "bodyLen": 79
           },
           {
@@ -207,7 +211,7 @@
       "name": "compute.listServices",
       "primitive": "compute",
       "ok": true,
-      "durationMs": 1200,
+      "durationMs": 1114,
       "request": {
         "method": "createReadOnlyInferenceBroker(rpc).listService",
         "args": {
@@ -275,7 +279,7 @@
       "name": "compute.invoke",
       "primitive": "compute",
       "ok": true,
-      "durationMs": 22075,
+      "durationMs": 21202,
       "request": {
         "method": "POST {endpoint}/v1/chat/completions",
         "args": {
@@ -301,7 +305,7 @@
           "model": "qwen/qwen-2.5-7b-instruct"
         },
         "requestHeaders": {
-          "Authorization": "Bearer app-sk-eyJhZGRyZXNzIjoiMHhiYzc0Q2U1MTIzOUYwMTY1QzkzMUQ3MjQ2NGJCYmY4MzYwYWVBMEMzIiwicHJvdmlkZXIiOiIweGE0OGYwMTI4NzIzMzUwOUZENjk0YTIyQmY4NDAyMjUwNjJFNjc4MzYiLCJ0aW1lc3RhbXAiOjE3NzgyMzIxNzMwODcsImV4cGlyZXNBdCI6MTc3ODMxODU3MzA4Nywibm9uY2UiOiIxNzc4MjMyMTczMDg3LXN2Y2FwazljcjFqMDAwMDAwMCIsImdlbmVyYXRpb24iOjAsInRva2VuSWQiOjI1NX18MHg0ODI2MWFlNzc3MWNlOWRkOTgwNmYwMGM5MDYyYWMzYzA3YzY4NWI5NmEyYTYxNzIwMWY4M2QzOGJjMTMxNDMyMTkwYjQ4NTU3N2Q1ODUyMTA0MWFlYTdjYzhmYTBjYzU2ZmViZDk0MzFkNmQ1Yzk2ZGY4YzEyZTQ0OGNkZTU3NjFi"
+          "Authorization": "Bearer app-sk-eyJhZGRyZXNzIjoiMHhiYzc0Q2U1MTIzOUYwMTY1QzkzMUQ3MjQ2NGJCYmY4MzYwYWVBMEMzIiwicHJvdmlkZXIiOiIweGE0OGYwMTI4NzIzMzUwOUZENjk0YTIyQmY4NDAyMjUwNjJFNjc4MzYiLCJ0aW1lc3RhbXAiOjE3NzgyMzk4NTA3NjcsImV4cGlyZXNBdCI6MTc3ODMyNjI1MDc2Nywibm9uY2UiOiIxNzc4MjM5ODUwNzY3LWM1M3ozODVvOGVkMDAwMDAwMCIsImdlbmVyYXRpb24iOjAsInRva2VuSWQiOjI1NX18MHhkMmQ4YzI4MzA2MWRkZmZiMWY2OTA4OGEwMzFiMjVhZjVhY2UxZDc4NzFjM2Y3YWE2NWYzNmQxOWM2NTJjNDBkMTRiMjRiNDE0M2VlNmU2NzZmZmJhZDNiYjNlOWRmZGVhODUyYTZjZGRkNTlkMzUwYzRlOGY2YjBlNGM3NjQxOTFj"
         },
         "requestBody": {
           "messages": [
@@ -320,29 +324,29 @@
           "access-control-expose-headers": "x-ratelimit-limit-requests, x-ratelimit-remaining-requests, x-ratelimit-reset-requests, x-ratelimit-limit-tokens, x-ratelimit-remaining-tokens, x-ratelimit-reset-tokens,Provider,content-encoding,ZG-Res-Key",
           "connection": "keep-alive",
           "content-encoding": "gzip",
-          "content-length": "279",
+          "content-length": "280",
           "content-type": "application/json",
-          "date": "Fri, 08 May 2026 09:22:56 GMT",
+          "date": "Fri, 08 May 2026 11:30:52 GMT",
           "provider": "0xa48f01287233509FD694a22Bf840225062E67836",
-          "req-arrive-time": "1778232175842",
-          "req-cost-time": "235",
-          "resp-start-time": "1778232176078",
+          "req-arrive-time": "1778239852462",
+          "req-cost-time": "213",
+          "resp-start-time": "1778239852675",
           "server": "nginx/1.27.4",
-          "set-cookie": "acw_tc=90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb3165801d3541add38dbd927ac6613285;path=/;HttpOnly;Max-Age=1800",
+          "set-cookie": "acw_tc=853d8693-8ffe-9e4c-abeb-c98367856fe3924257e8fd0f5ef1f95e5fb47f352728;path=/;HttpOnly;Max-Age=1800",
           "vary": "Origin,Access-Control-Request-Method,Access-Control-Request-Headers, Accept-Encoding",
           "x-dashscope-call-gateway": "true",
-          "x-envoy-upstream-service-time": "235",
+          "x-envoy-upstream-service-time": "213",
           "x-ratelimit-limit-requests": "10",
           "x-ratelimit-limit-tokens": "30000",
           "x-ratelimit-remaining-requests": "2",
           "x-ratelimit-remaining-tokens": "42000",
           "x-ratelimit-reset-requests": "0s",
           "x-ratelimit-reset-tokens": "0s",
-          "x-request-id": "90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
-          "zg-res-key": "f5be2307-d315-487f-a7c5-d4a75d0f4225"
+          "x-request-id": "853d8693-8ffe-9e4c-abeb-c98367856fe3",
+          "zg-res-key": "08010f5a-1678-4443-9b71-ae8ac8247b0f"
         },
         "rawBodyBytes": 368,
-        "rawBodyPreview": "{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":\"Hello! How can I assist you today\"},\"finish_reason\":\"length\",\"index\":0,\"logprobs\":null}],\"object\":\"chat.completion\",\"usage\":{\"prompt_tokens\":9,\"completion_tokens\":8,\"total_tokens\":17},\"created\":1778232176,\"system_fingerprint\":null,\"model\":\"qwen2.5-7b-instruct\",\"id\":\"chatcmpl-90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb\"}",
+        "rawBodyPreview": "{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":\"Hello! How can I assist you today\"},\"finish_reason\":\"length\",\"index\":0,\"logprobs\":null}],\"object\":\"chat.completion\",\"usage\":{\"prompt_tokens\":9,\"completion_tokens\":8,\"total_tokens\":17},\"created\":1778239853,\"system_fingerprint\":null,\"model\":\"qwen2.5-7b-instruct\",\"id\":\"chatcmpl-853d8693-8ffe-9e4c-abeb-c98367856fe3\"}",
         "parsedBody": {
           "choices": [
             {
@@ -361,12 +365,12 @@
             "completion_tokens": 8,
             "total_tokens": 17
           },
-          "created": 1778232176,
+          "created": 1778239853,
           "system_fingerprint": null,
           "model": "qwen2.5-7b-instruct",
-          "id": "chatcmpl-90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb"
+          "id": "chatcmpl-853d8693-8ffe-9e4c-abeb-c98367856fe3"
         },
-        "chatId": "chatcmpl-90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
+        "chatId": "chatcmpl-853d8693-8ffe-9e4c-abeb-c98367856fe3",
         "assistantContent": "Hello! How can I assist you today",
         "tokenUsage": {
           "prompt_tokens": 9,
@@ -376,12 +380,12 @@
         "signatureLocations": {},
         "signatureValid": null,
         "verifyError": "getting signature error",
-        "signatureDownloadUrl": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/f5be2307-d315-487f-a7c5-d4a75d0f4225",
+        "signatureDownloadUrl": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/08010f5a-1678-4443-9b71-ae8ac8247b0f",
         "signatureFetchAttempts": [
           {
             "attempt": 1,
             "afterDelayMs": 0,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-853d8693-8ffe-9e4c-abeb-c98367856fe3",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -394,7 +398,7 @@
           {
             "attempt": 2,
             "afterDelayMs": 5000,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-853d8693-8ffe-9e4c-abeb-c98367856fe3",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -407,7 +411,7 @@
           {
             "attempt": 3,
             "afterDelayMs": 0,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-853d8693-8ffe-9e4c-abeb-c98367856fe3",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -420,7 +424,7 @@
           {
             "attempt": 4,
             "afterDelayMs": 5000,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-853d8693-8ffe-9e4c-abeb-c98367856fe3",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -433,7 +437,7 @@
           {
             "attempt": 5,
             "afterDelayMs": 0,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/853d8693-8ffe-9e4c-abeb-c98367856fe3",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -446,7 +450,7 @@
           {
             "attempt": 6,
             "afterDelayMs": 5000,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/90c16bc5-5c2b-9ffc-9ac5-bc4b2ec977eb",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/853d8693-8ffe-9e4c-abeb-c98367856fe3",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -459,14 +463,14 @@
           {
             "attempt": 7,
             "afterDelayMs": 0,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/f5be2307-d315-487f-a7c5-d4a75d0f4225",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/08010f5a-1678-4443-9b71-ae8ac8247b0f",
             "status": 200,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 606,
-            "bodyPreview": "{\"text\":\"6c4d35f957e407ef8cb72b990d5436571c19b54a96028896e07ab9c1787b5d5b:412b4fcbedefa568d6fb8ae341efabbd4786c1abde9f0629c41078099f51c0db:centralized:aliyun:9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e\",\"signature\":\"0x83e7e76c2c70301ac5d4962552bdc55c4c2fbfad30943cb7b54119f63602a3bf0504b03804088a5beb643bf6a0b8cbd6aea40a25fd55a123a51477a4189324c71c\",\"signing_address\":\"0x83df4b8eba7c0b3b740019b8c9a77fff77d508cf\",\"signing_algo\":\"ecdsa\",\"provider_type\":\"centralized\",\"provider_identity\":\"aliyun\",\"tls_cert_fingerprint\":\"9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e\"}",
+            "bodyPreview": "{\"text\":\"6c4d35f957e407ef8cb72b990d5436571c19b54a96028896e07ab9c1787b5d5b:24133800923f113e1f1a32a35657e99bec24fdd4991c06de48d5f8e6ce7d11f6:centralized:aliyun:9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e\",\"signature\":\"0x5bbb7618fd1c47972f124c3343bb7eda3890ace7213a96404402a14e1d074de6090ed06741c4c31afea2c04a4105ff14ccb9a1c76bdcb7d1691a7efe9dc3af461c\",\"signing_address\":\"0x83df4b8eba7c0b3b740019b8c9a77fff77d508cf\",\"signing_algo\":\"ecdsa\",\"provider_type\":\"centralized\",\"provider_identity\":\"aliyun\",\"tls_cert_fingerprint\":\"9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e\"}",
             "parsed": {
-              "text": "6c4d35f957e407ef8cb72b990d5436571c19b54a96028896e07ab9c1787b5d5b:412b4fcbedefa568d6fb8ae341efabbd4786c1abde9f0629c41078099f51c0db:centralized:aliyun:9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e",
-              "signature": "0x83e7e76c2c70301ac5d4962552bdc55c4c2fbfad30943cb7b54119f63602a3bf0504b03804088a5beb643bf6a0b8cbd6aea40a25fd55a123a51477a4189324c71c",
+              "text": "6c4d35f957e407ef8cb72b990d5436571c19b54a96028896e07ab9c1787b5d5b:24133800923f113e1f1a32a35657e99bec24fdd4991c06de48d5f8e6ce7d11f6:centralized:aliyun:9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e",
+              "signature": "0x5bbb7618fd1c47972f124c3343bb7eda3890ace7213a96404402a14e1d074de6090ed06741c4c31afea2c04a4105ff14ccb9a1c76bdcb7d1691a7efe9dc3af461c",
               "signing_address": "0x83df4b8eba7c0b3b740019b8c9a77fff77d508cf",
               "signing_algo": "ecdsa",
               "provider_type": "centralized",
