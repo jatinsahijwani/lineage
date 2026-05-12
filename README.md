@@ -213,6 +213,7 @@ sequenceDiagram
     participant Alice as Alice (Data Creator)
     participant Bob as Bob (Model Creator)
     participant Carol as Carol (Agent Operator)
+    participant User as End User
     participant Storage as 0G Storage
     participant Registry as LineageRegistry
     participant Compute as 0G Compute (TEE)
@@ -221,30 +222,31 @@ sequenceDiagram
 
     Alice->>Storage: upload encrypted dataset
     Storage-->>Alice: storage root D1
-    Alice->>Registry: mint DataINFT(D1, royalty=2%)
+    Alice->>Registry: mint Data iNFT (D1, royalty=2%)
     Registry-->>Alice: tokenId d1
 
     Bob->>Storage: upload model weights
     Storage-->>Bob: storage root M1
-    Bob->>Registry: mint ModelINFT(M1, parents=[d1], royalty=5%)
-    Registry-->>Registry: assert acyclic; record edges
+    Bob->>Registry: mint Model iNFT (M1, parents=[d1], royalty=5%)
+    Registry->>Registry: assert acyclic + record edges
     Registry-->>Bob: tokenId m1
 
-    Carol->>Registry: register agent (uses m1, skills [s2])
+    Carol->>Registry: register agent (uses m1 + skills)
     Note over Carol: Agent runner starts
 
     User->>Carol: "Summarize today's news"
-    Carol->>Compute: InferenceRequest(model=m1, skills=[s2], input=...)
-    Compute->>Compute: load m1 weights from Storage; run inference
+    Carol->>Compute: InferenceRequest(model=m1, skills=[s2])
+    Compute->>Storage: load model weights
+    Compute->>Compute: run verifiable inference
     Compute-->>Carol: response + signed AttributionReceipt
     Carol->>DA: post receipt
     Carol-->>User: response
 
     Note over Splitter: Settlement window closes (hourly)
-    Splitter->>DA: read all receipts in window
-    Splitter->>Registry: load lineage for each iNFT
-    Splitter->>Splitter: compute weighted payout per contributor
-    Splitter->>Splitter: build Merkle tree; post root on-chain
+    Splitter->>DA: read all receipts
+    Splitter->>Registry: load lineage graph
+    Splitter->>Splitter: compute weighted payouts
+    Splitter->>Splitter: build Merkle tree & post root on-chain
 
     Alice->>Splitter: claim() with proof
     Splitter-->>Alice: USDC transferred
