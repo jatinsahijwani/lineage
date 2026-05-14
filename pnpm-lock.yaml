@@ -45,9 +45,15 @@ importers:
       '@hookform/resolvers':
         specifier: ^3.9.1
         version: 3.10.0(react-hook-form@7.75.0(react@19.2.6))
+      '@lineage/runner':
+        specifier: workspace:^
+        version: link:../services/runner
       '@lineage/sdk':
         specifier: workspace:^
         version: link:../packages/sdk
+      '@lineage/settler':
+        specifier: workspace:^
+        version: link:../services/settler
       '@lineage/shared':
         specifier: workspace:^
         version: link:../packages/shared

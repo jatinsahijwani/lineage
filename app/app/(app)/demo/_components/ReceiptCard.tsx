@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { AttributionReceipt } from "@lineage/shared";
 import { GlowingBadge } from "@/components/shared/GlowingBadge";
 import { cn } from "@/lib/utils";
+import type { DemoStatus } from "./useDemoScreen";
 
 interface ReceiptCardProps {
   receipt: AttributionReceipt | null;
-  status: "idle" | "running" | "settling" | "done";
+  status: DemoStatus;
 }
 
 function trunc(value: string, head = 10, tail = 6): string {
@@ -17,17 +18,23 @@ function trunc(value: string, head = 10, tail = 6): string {
 }
 
 export function ReceiptCard({ receipt, status }: ReceiptCardProps) {
-  const stateLabel =
-    status === "running"
-      ? "computing…"
-      : status === "settling" || status === "done"
-        ? "signed"
-        : receipt
-          ? "signed"
-          : "idle";
+  const isRunning =
+    status === "compute" ||
+    status === "attestation" ||
+    status === "persisting";
+  const stateLabel = isRunning
+    ? status === "attestation"
+      ? "attesting…"
+      : status === "persisting"
+        ? "persisting…"
+        : "computing…"
+    : receipt
+      ? "signed"
+      : "idle";
 
-  const stateVariant: "blue" | "purple" | "cyan" =
-    status === "running" ? "blue" : receipt ? "purple" : "purple";
+  const stateVariant: "blue" | "purple" | "cyan" = isRunning
+    ? "blue"
+    : "purple";
 
   const rows = receipt
     ? [
@@ -72,8 +79,8 @@ export function ReceiptCard({ receipt, status }: ReceiptCardProps) {
       ) : (
         <div className="flex h-40 flex-col items-center justify-center gap-2 text-center">
           <div className="text-sm text-white/50">
-            {status === "running"
-              ? "Submitting to mock TEE…"
+            {isRunning
+              ? "Submitting to 0G Compute…"
               : "Receipt will appear after you run inference."}
           </div>
         </div>

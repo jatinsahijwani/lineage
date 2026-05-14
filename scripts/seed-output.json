@@ -1,0 +1,60 @@
+{
+  "deployer": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
+  "mintedAt": "2026-05-14T07:45:30.037Z",
+  "tokens": {
+    "data": [
+      {
+        "id": "33",
+        "name": "Alice's News Headlines Dataset",
+        "owner": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
+        "royaltyBps": 200
+      },
+      {
+        "id": "34",
+        "name": "Bob's Financial Data",
+        "owner": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
+        "royaltyBps": 300
+      },
+      {
+        "id": "35",
+        "name": "Carol's Sentiment Data",
+        "owner": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
+        "royaltyBps": 150
+      }
+    ],
+    "model": [
+      {
+        "id": "36",
+        "name": "NewsModel-v1",
+        "owner": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
+        "royaltyBps": 500
+      }
+    ],
+    "skill": [
+      {
+        "id": "37",
+        "name": "WebSearch",
+        "owner": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
+        "royaltyBps": 200
+      }
+    ],
+    "memory": []
+  },
+  "agents": [
+    {
+      "id": "news-summarizer",
+      "name": "News Summarizer",
+      "description": "Summarises news articles using a web-search skill.",
+      "modelTokenId": "36",
+      "skills": [
+        "37"
+      ],
+      "data": [
+        "33",
+        "34",
+        "35"
+      ],
+      "memory": []
+    }
+  ]
+}

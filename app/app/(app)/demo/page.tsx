@@ -32,6 +32,7 @@ import {
 import { ReceiptCard } from "./_components/ReceiptCard";
 import { LineageTreeSvg } from "./_components/LineageTreeSvg";
 import { PayoutsCard } from "./_components/PayoutsCard";
+import { VerificationPanel } from "./_components/VerificationPanel";
 
 const PRIMARY_CTA_CLASS =
   "group inline-flex items-center gap-2 rounded-lg bg-blue-600 px-8 py-3.5 font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-blue-600 disabled:hover:shadow-none";
@@ -54,7 +55,19 @@ export default function DemoPage() {
     };
   }, [screen.receipt]);
 
-  const isRunning = screen.status === "running";
+  const isRunning =
+    screen.status === "compute" ||
+    screen.status === "attestation" ||
+    screen.status === "persisting";
+  const isSettling = screen.status === "settling";
+  const runningLabel =
+    screen.status === "compute"
+      ? "Calling 0G Compute…"
+      : screen.status === "attestation"
+        ? "Fetching TEE attestation…"
+        : screen.status === "persisting"
+          ? "Persisting receipt…"
+          : "Running…";
 
   return (
     <GradientBg variant="intense" className="min-h-[calc(100vh-4rem)]">
@@ -161,15 +174,15 @@ export default function DemoPage() {
                       ) : (
                         <Sparkles className="h-4 w-4" />
                       )}
-                      {isRunning ? "Running…" : "Run inference"}
+                      {isRunning ? runningLabel : "Run inference"}
                     </button>
                     <button
                       type="button"
                       onClick={screen.settle}
-                      disabled={!screen.receipt || screen.status === "settling"}
+                      disabled={!screen.receipt || isSettling}
                       className={SECONDARY_CTA_CLASS}
                     >
-                      Settle now (demo)
+                      {isSettling ? "Settling on-chain…" : "Settle now"}
                     </button>
                     {screen.receipt && (
                       <button
@@ -186,7 +199,7 @@ export default function DemoPage() {
                 {screen.output && (
                   <div className="rounded-lg border border-white/5 bg-white/[0.02] p-3">
                     <div className="mb-1 font-mono text-[10px] uppercase tracking-wider text-white/40">
-                      Mock TEE output
+                      TEE-verified output
                     </div>
                     <div className="break-words text-sm text-white/80">
                       {screen.output}
@@ -205,6 +218,12 @@ export default function DemoPage() {
             className="space-y-6 lg:col-span-7"
           >
             <ReceiptCard receipt={screen.receipt} status={screen.status} />
+
+            <VerificationPanel
+              receipt={screen.receipt}
+              daPointer={screen.daPointer}
+              settleResult={screen.settleResult}
+            />
 
             <div className="rounded-xl border border-white/10 glass-dark p-6">
               <div className="mb-4 flex items-center justify-between">

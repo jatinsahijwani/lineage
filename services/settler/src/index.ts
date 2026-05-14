@@ -17,6 +17,10 @@ export type {
   VerificationFailure,
   VerificationResult,
 } from "./verifier.js";
+export { aggregateReceipts } from "./attribute.js";
+export type { PayoutEntry } from "./attribute.js";
+export { buildMerkleTree, getProof } from "./merkle.js";
+export type { PayoutLeaf } from "./merkle.js";
 
 // Minimal local copy of the runner's ReceiptSink interface to avoid a
 // services-to-services dependency. Settler only needs `read`.

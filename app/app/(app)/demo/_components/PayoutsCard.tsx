@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { formatEther } from "viem";
 import type { PayoutRow } from "./useDemoScreen";
 
 interface PayoutsCardProps {
@@ -34,7 +35,16 @@ function useEaseOut(target: number, durationMs = 800): number {
 }
 
 function PayoutRowItem({ row }: { row: PayoutRow }) {
-  const animatedAmount = useEaseOut(row.amount, 800);
+  const targetOg = useMemo(() => {
+    // Wei (string) -> OG (number) for the easing animation. Demo amounts are
+    // well under 2^53 wei so direct Number() is fine here.
+    try {
+      return Number(formatEther(BigInt(row.amount)));
+    } catch {
+      return 0;
+    }
+  }, [row.amount]);
+  const animatedAmount = useEaseOut(targetOg, 800);
   const initial = row.label.replace(/[^A-Za-z0-9]/g, "").slice(0, 2) || "??";
   return (
     <motion.li

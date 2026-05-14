@@ -40,7 +40,7 @@ export function useLineage() {
       splitter: CONTRACT_ADDRESSES.RoyaltySplitter,
       verifier: CONTRACT_ADDRESSES.AttributionVerifier,
       teePublicKey: "0x83df4B8EbA7c0B3B740019b8c9a77fff77D508cF",
-      mockTEE: true,
+      mockTEE: false,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady]);

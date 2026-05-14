@@ -174,7 +174,12 @@ export class LineageClient {
       chain: undefined,
     });
 
-    const receipt = await this.publicClient.waitForTransactionReceipt({ hash });
+    const receipt = await this.publicClient.waitForTransactionReceipt({
+      hash,
+        pollingInterval: 8000,     // 8 seconds
+        retryCount: 50,
+        timeout: 480_000,
+    });
     const tokenId = this._parseTokenIdFromReceipt(receipt);
     return { tokenId, hash };
   }
@@ -222,7 +227,12 @@ export class LineageClient {
       chain: undefined,
     });
 
-    const txReceipt = await this.publicClient.waitForTransactionReceipt({ hash });
+    const txReceipt = await this.publicClient.waitForTransactionReceipt({
+      hash,
+        pollingInterval: 8000,     // 8 seconds
+        retryCount: 50,
+        timeout: 480_000,
+    });
     const tokenId = this._parseTokenIdFromReceipt(txReceipt);
     return { tokenId, hash };
   }
@@ -270,7 +280,12 @@ export class LineageClient {
       chain: undefined,
     });
 
-    const txReceipt = await this.publicClient.waitForTransactionReceipt({ hash });
+    const txReceipt = await this.publicClient.waitForTransactionReceipt({
+      hash,
+        pollingInterval: 8000,     // 8 seconds
+        retryCount: 50,
+        timeout: 480_000,
+    });
     const tokenId = this._parseTokenIdFromReceipt(txReceipt);
     return { tokenId, hash };
   }

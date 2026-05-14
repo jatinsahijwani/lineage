@@ -2,6 +2,22 @@
   "name": "@lineage/runner",
   "version": "0.1.0",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./inference.js": {
+      "import": "./dist/inference.js",
+      "types": "./dist/inference.d.ts"
+    },
+    "./receipt-sink.js": {
+      "import": "./dist/receipt-sink.js",
+      "types": "./dist/receipt-sink.d.ts"
+    }
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",

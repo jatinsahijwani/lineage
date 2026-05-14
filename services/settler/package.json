@@ -2,6 +2,22 @@
   "name": "@lineage/settler",
   "version": "0.1.0",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./attribute.js": {
+      "import": "./dist/attribute.js",
+      "types": "./dist/attribute.d.ts"
+    },
+    "./merkle.js": {
+      "import": "./dist/merkle.js",
+      "types": "./dist/merkle.d.ts"
+    }
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",

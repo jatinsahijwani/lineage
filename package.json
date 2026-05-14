@@ -8,6 +8,7 @@
     "test": "pnpm -r test",
     "test:contracts": "cd contracts && forge test -vv",
     "deploy:testnet": "tsx scripts/deploy-testnet.ts",
+    "register-operator": "tsx scripts/register-operator.ts",
     "seed:testnet": "tsx --import ./scripts/libsodium-shim.mjs scripts/seed-testnet.ts",
     "e2e": "tsx --import ./scripts/libsodium-shim.mjs scripts/e2e-demo.ts",
     "smoke": "node --experimental-strip-types --no-warnings scripts/smoke.ts"
