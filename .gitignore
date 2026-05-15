@@ -19,5 +19,9 @@ contracts/lib/
 app/.next/
 app/out/
 
+# Proof store (runtime state, per-machine)
+.proofs.json
+app/.proofs.json
+
 # OS
 .DS_Store

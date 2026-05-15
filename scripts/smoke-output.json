@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-05-07T08:38:09.584Z",
+  "ranAt": "2026-05-08T11:31:09.873Z",
   "endpoints": {
     "rpc": "https://evmrpc-testnet.0g.ai",
     "storage": "https://indexer-storage-testnet-turbo.0g.ai",
@@ -11,9 +11,9 @@
   },
   "summary": {
     "total": 10,
-    "ok": 9,
+    "ok": 10,
     "failed": 0,
-    "skipped": 1,
+    "skipped": 0,
     "critical": 1,
     "warnings": 1,
     "infos": 1
@@ -23,7 +23,7 @@
       "name": "chain.getChainId",
       "primitive": "chain",
       "ok": true,
-      "durationMs": 802,
+      "durationMs": 795,
       "request": {
         "method": "eth_chainId",
         "args": {}
@@ -36,12 +36,12 @@
       "name": "chain.getBlockNumber",
       "primitive": "chain",
       "ok": true,
-      "durationMs": 716,
+      "durationMs": 748,
       "request": {
         "method": "eth_blockNumber",
         "args": {}
       },
-      "response": "32012075n",
+      "response": "32208847n",
       "observedShape": "bigint",
       "drift": []
     },
@@ -49,7 +49,7 @@
       "name": "chain.getBalance",
       "primitive": "chain",
       "ok": true,
-      "durationMs": 247,
+      "durationMs": 248,
       "request": {
         "method": "eth_getBalance",
         "args": {
@@ -58,7 +58,7 @@
       },
       "response": {
         "address": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
-        "wei": "12586723343373961677n"
+        "wei": "12547452183104302422n"
       },
       "observedShape": "{ address: hex(20B), wei: bigint }",
       "drift": []
@@ -66,35 +66,44 @@
     "chain.readContract": {
       "name": "chain.readContract",
       "primitive": "chain",
-      "ok": false,
-      "durationMs": 0,
+      "ok": true,
+      "durationMs": 279,
       "request": {
-        "method": "(skipped)",
-        "args": null
+        "method": "getINFT",
+        "args": {
+          "tokenId": "1n",
+          "address": "0x5Ba9010bf4A6E13F098d1ce5DBAF52c22E21B3f5"
+        }
       },
-      "response": null,
-      "observedShape": "",
-      "drift": [],
-      "skipped": {
-        "reason": "no LineageRegistry in deployments.json — run pnpm deploy:testnet first"
-      }
+      "response": {
+        "tokenId": "1n",
+        "storageRoot": "0x9b6cb93ff78d19dfdec9e2d074c5cf4b2f61296a8b77755e6b9a89be117f9731",
+        "owner": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
+        "iType": 0,
+        "royaltyBps": 200,
+        "royaltyReceiver": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
+        "createdAt": "1778239748n",
+        "paused": false
+      },
+      "observedShape": "{ tokenId: bigint, storageRoot: hex(32B), owner: hex(20B), iType: number, royaltyBps: number, royaltyReceiver: hex(20B), createdAt: bigint, paused: boolean }",
+      "drift": []
     },
     "storage.upload": {
       "name": "storage.upload",
       "primitive": "storage",
       "ok": true,
-      "durationMs": 13446,
+      "durationMs": 13035,
       "request": {
         "method": "Indexer.upload",
         "args": {
           "blobBytes": 120,
-          "tag": "lineage-smoke-2026-05-07T08:37:31.931Z"
+          "tag": "lineage-smoke-2026-05-08T11:30:31.077Z"
         }
       },
       "response": {
-        "txHash": "0xd6ab21d460c3a72420f9bee4f75c6aed3002471bdf57d8cd65f9be745004d01c",
-        "rootHash": "0xe8d8a76caabd0bbed3e4fb15dbe681eda112e923d46ac7990e3d9aa3491802ae",
-        "txSeq": 92438
+        "txHash": "0x03b44a8c13bb23cf2e7fb129907c3ced9d9f625c9378fe1bf959ae1833ceebaf",
+        "rootHash": "0x734f3b034b5a88f12f79a2e59de3ed3bd7784235e9eb7e925131ee5ec2c17319",
+        "txSeq": 96515
       },
       "observedShape": "{ txHash: hex(32B), rootHash: hex(32B), txSeq: number }",
       "drift": []
@@ -103,16 +112,16 @@
       "name": "storage.download",
       "primitive": "storage",
       "ok": true,
-      "durationMs": 2347,
+      "durationMs": 2701,
       "request": {
         "method": "Indexer.downloadToBlob",
         "args": {
-          "rootHash": "0xe8d8a76caabd0bbed3e4fb15dbe681eda112e923d46ac7990e3d9aa3491802ae"
+          "rootHash": "0x734f3b034b5a88f12f79a2e59de3ed3bd7784235e9eb7e925131ee5ec2c17319"
         }
       },
       "response": {
         "sizeBytes": 120,
-        "recoveredTag": "lineage-smoke-2026-05-07T08:37:31.931Z",
+        "recoveredTag": "lineage-smoke-2026-05-08T11:30:31.077Z",
         "matches": true
       },
       "observedShape": "Blob(120B)",
@@ -122,7 +131,7 @@
       "name": "da.submit",
       "primitive": "da",
       "ok": true,
-      "durationMs": 457,
+      "durationMs": 733,
       "request": {
         "method": "POST",
         "args": {
@@ -133,7 +142,7 @@
             "/da/v1/blob",
             "/"
           ],
-          "payloadBytes": 497
+          "payloadBytes": 772
         }
       },
       "response": {
@@ -142,21 +151,21 @@
             "path": "/disperser/disperse_blob",
             "status": 404,
             "contentType": "text/plain; charset=utf-8",
-            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::92w67-1778143068059-4888b8b37106\n",
+            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::trdmx-1778239847107-6f660dffd773\n",
             "bodyLen": 79
           },
           {
             "path": "/v1/blob",
             "status": 404,
             "contentType": "text/plain; charset=utf-8",
-            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::5dbqn-1778143068173-35156db7d6a3\n",
+            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::jk97k-1778239847390-2aa5d7f1da2d\n",
             "bodyLen": 79
           },
           {
             "path": "/da/v1/blob",
             "status": 404,
             "contentType": "text/plain; charset=utf-8",
-            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::m8msb-1778143068218-f87c91d6a807\n",
+            "bodyPreview": "The page could not be found\n\nNOT_FOUND\n\nbom1::p55ts-1778239847463-13c565ccb504\n",
             "bodyLen": 79
           },
           {
@@ -187,14 +196,14 @@
         {
           "severity": "warning",
           "ours": {
-            "file": "packages/shared/src/index.ts",
-            "symbol": "SettlementBatch.daCommitment",
-            "type": "`0x${string}` (bytes32)"
+            "file": "contracts/src/interfaces/IRoyaltySplitter.sol",
+            "symbol": "SettlementBatch.daPointer",
+            "type": "DAPointer { bytes32 commitment; uint64 blobIndex; }"
           },
           "actual": {
             "type": "(no response)"
           },
-          "note": "DA likely returns a KZG commitment + blob index, not a single bytes32. Schema may need a struct."
+          "note": "Confirm the real DA response carries both a 32-byte commitment and a sequential blob index. If DA returns only a KZG commitment, blobIndex will need to be derived elsewhere."
         }
       ]
     },
@@ -202,7 +211,7 @@
       "name": "compute.listServices",
       "primitive": "compute",
       "ok": true,
-      "durationMs": 983,
+      "durationMs": 1114,
       "request": {
         "method": "createReadOnlyInferenceBroker(rpc).listService",
         "args": {
@@ -214,9 +223,9 @@
           "0xa48f01287233509FD694a22Bf840225062E67836",
           "chatbot",
           "https://compute-network-6.integratenetwork.work",
-          "50000000000n",
-          "100000000000n",
-          "1777372525n",
+          "310000000000n",
+          "1240000000000n",
+          "1778212340n",
           "qwen/qwen-2.5-7b-instruct",
           "TeeML",
           "{\"ImageDigest\":\"\",\"ImageName\":\"\",\"ProviderIdentity\":\"aliyun\",\"ProviderType\":\"centralized\",\"TEEVerifier\":\"dstack\",\"TargetSeparated\":true,\"TargetTeeAddress\":\"\",\"VerifierURL\":\"https://github.com/Dstack-TEE/dstack/releases/tag/verifier-v0.5.8\"}",
@@ -256,12 +265,12 @@
         "model": "qwen/qwen-2.5-7b-instruct",
         "serviceType": "chatbot",
         "url": "https://compute-network-6.integratenetwork.work",
-        "inputPrice": "50000000000",
-        "outputPrice": "100000000000",
+        "inputPrice": "310000000000",
+        "outputPrice": "1240000000000",
         "verifiability": "TeeML",
         "teeSignerAddress": "0x83df4B8EbA7c0B3B740019b8c9a77ffF77D508cF",
         "teeSignerAcknowledged": true,
-        "updatedAt": "1777372525"
+        "updatedAt": "1778212340"
       },
       "observedShape": "[hex(20B)×11]",
       "drift": []
@@ -270,7 +279,7 @@
       "name": "compute.invoke",
       "primitive": "compute",
       "ok": true,
-      "durationMs": 20415,
+      "durationMs": 21202,
       "request": {
         "method": "POST {endpoint}/v1/chat/completions",
         "args": {
@@ -296,7 +305,7 @@
           "model": "qwen/qwen-2.5-7b-instruct"
         },
         "requestHeaders": {
-          "Authorization": "Bearer app-sk-eyJhZGRyZXNzIjoiMHhiYzc0Q2U1MTIzOUYwMTY1QzkzMUQ3MjQ2NGJCYmY4MzYwYWVBMEMzIiwicHJvdmlkZXIiOiIweGE0OGYwMTI4NzIzMzUwOUZENjk0YTIyQmY4NDAyMjUwNjJFNjc4MzYiLCJ0aW1lc3RhbXAiOjE3NzgxNDMwNzExODcsImV4cGlyZXNBdCI6MTc3ODIyOTQ3MTE4Nywibm9uY2UiOiIxNzc4MTQzMDcxMTg3LWg0a25tbThwOXNlMDAwMDAwMCIsImdlbmVyYXRpb24iOjAsInRva2VuSWQiOjI1NX18MHg4Y2FjZDcxNjRiMDYwZDhlOTI2ZGEzNmJmMDNjNTcyNWU4MTYxYTk4YTMwMTgyMWY3MjlhNjUxNjRiYTVkMDJjNGVlNDgxNTJjZWIxYTg2MTFkMWQxMmI4ZTU2ZGM1NjJhNDA3NzgxMzAxNWI5YzMxZDM2MzM4ZGNiMDFmMzUzYzFi"
+          "Authorization": "Bearer app-sk-eyJhZGRyZXNzIjoiMHhiYzc0Q2U1MTIzOUYwMTY1QzkzMUQ3MjQ2NGJCYmY4MzYwYWVBMEMzIiwicHJvdmlkZXIiOiIweGE0OGYwMTI4NzIzMzUwOUZENjk0YTIyQmY4NDAyMjUwNjJFNjc4MzYiLCJ0aW1lc3RhbXAiOjE3NzgyMzk4NTA3NjcsImV4cGlyZXNBdCI6MTc3ODMyNjI1MDc2Nywibm9uY2UiOiIxNzc4MjM5ODUwNzY3LWM1M3ozODVvOGVkMDAwMDAwMCIsImdlbmVyYXRpb24iOjAsInRva2VuSWQiOjI1NX18MHhkMmQ4YzI4MzA2MWRkZmZiMWY2OTA4OGEwMzFiMjVhZjVhY2UxZDc4NzFjM2Y3YWE2NWYzNmQxOWM2NTJjNDBkMTRiMjRiNDE0M2VlNmU2NzZmZmJhZDNiYjNlOWRmZGVhODUyYTZjZGRkNTlkMzUwYzRlOGY2YjBlNGM3NjQxOTFj"
         },
         "requestBody": {
           "messages": [
@@ -310,35 +319,34 @@
           "temperature": 0
         },
         "httpStatus": 200,
-        "usedPath": "/chat/completions",
+        "usedPath": "/v1/chat/completions",
         "responseHeaders": {
-          "connection": "keep-alive",
-          "content-length": "281",
-          "content-type": "application/json",
-          "date": "Thu, 07 May 2026 08:37:53 GMT",
-          "server": "nginx/1.27.4",
-          "__failed_/v1/chat/completions_status": "400",
           "access-control-expose-headers": "x-ratelimit-limit-requests, x-ratelimit-remaining-requests, x-ratelimit-reset-requests, x-ratelimit-limit-tokens, x-ratelimit-remaining-tokens, x-ratelimit-reset-tokens,Provider,content-encoding,ZG-Res-Key",
+          "connection": "keep-alive",
           "content-encoding": "gzip",
+          "content-length": "280",
+          "content-type": "application/json",
+          "date": "Fri, 08 May 2026 11:30:52 GMT",
           "provider": "0xa48f01287233509FD694a22Bf840225062E67836",
-          "req-arrive-time": "1778143072950",
-          "req-cost-time": "233",
-          "resp-start-time": "1778143073183",
-          "set-cookie": "acw_tc=b3287fed-4c4e-9835-802d-a162a5fdbb7c30566ac83738c86e23c825617c59e60f;path=/;HttpOnly;Max-Age=1800",
+          "req-arrive-time": "1778239852462",
+          "req-cost-time": "213",
+          "resp-start-time": "1778239852675",
+          "server": "nginx/1.27.4",
+          "set-cookie": "acw_tc=853d8693-8ffe-9e4c-abeb-c98367856fe3924257e8fd0f5ef1f95e5fb47f352728;path=/;HttpOnly;Max-Age=1800",
           "vary": "Origin,Access-Control-Request-Method,Access-Control-Request-Headers, Accept-Encoding",
           "x-dashscope-call-gateway": "true",
-          "x-envoy-upstream-service-time": "232",
+          "x-envoy-upstream-service-time": "213",
           "x-ratelimit-limit-requests": "10",
           "x-ratelimit-limit-tokens": "30000",
           "x-ratelimit-remaining-requests": "2",
           "x-ratelimit-remaining-tokens": "42000",
           "x-ratelimit-reset-requests": "0s",
           "x-ratelimit-reset-tokens": "0s",
-          "x-request-id": "b3287fed-4c4e-9835-802d-a162a5fdbb7c",
-          "zg-res-key": "d821b7cd-8b23-4a4c-9186-4d9284fa432d"
+          "x-request-id": "853d8693-8ffe-9e4c-abeb-c98367856fe3",
+          "zg-res-key": "08010f5a-1678-4443-9b71-ae8ac8247b0f"
         },
         "rawBodyBytes": 368,
-        "rawBodyPreview": "{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":\"Hello! How can I assist you today\"},\"finish_reason\":\"length\",\"index\":0,\"logprobs\":null}],\"object\":\"chat.completion\",\"usage\":{\"prompt_tokens\":9,\"completion_tokens\":8,\"total_tokens\":17},\"created\":1778143073,\"system_fingerprint\":null,\"model\":\"qwen2.5-7b-instruct\",\"id\":\"chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c\"}",
+        "rawBodyPreview": "{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":\"Hello! How can I assist you today\"},\"finish_reason\":\"length\",\"index\":0,\"logprobs\":null}],\"object\":\"chat.completion\",\"usage\":{\"prompt_tokens\":9,\"completion_tokens\":8,\"total_tokens\":17},\"created\":1778239853,\"system_fingerprint\":null,\"model\":\"qwen2.5-7b-instruct\",\"id\":\"chatcmpl-853d8693-8ffe-9e4c-abeb-c98367856fe3\"}",
         "parsedBody": {
           "choices": [
             {
@@ -357,12 +365,12 @@
             "completion_tokens": 8,
             "total_tokens": 17
           },
-          "created": 1778143073,
+          "created": 1778239853,
           "system_fingerprint": null,
           "model": "qwen2.5-7b-instruct",
-          "id": "chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c"
+          "id": "chatcmpl-853d8693-8ffe-9e4c-abeb-c98367856fe3"
         },
-        "chatId": "chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+        "chatId": "chatcmpl-853d8693-8ffe-9e4c-abeb-c98367856fe3",
         "assistantContent": "Hello! How can I assist you today",
         "tokenUsage": {
           "prompt_tokens": 9,
@@ -372,12 +380,12 @@
         "signatureLocations": {},
         "signatureValid": null,
         "verifyError": "getting signature error",
-        "signatureDownloadUrl": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/d821b7cd-8b23-4a4c-9186-4d9284fa432d",
+        "signatureDownloadUrl": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/08010f5a-1678-4443-9b71-ae8ac8247b0f",
         "signatureFetchAttempts": [
           {
             "attempt": 1,
             "afterDelayMs": 0,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-853d8693-8ffe-9e4c-abeb-c98367856fe3",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -390,7 +398,7 @@
           {
             "attempt": 2,
             "afterDelayMs": 5000,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-853d8693-8ffe-9e4c-abeb-c98367856fe3",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -403,7 +411,7 @@
           {
             "attempt": 3,
             "afterDelayMs": 0,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-853d8693-8ffe-9e4c-abeb-c98367856fe3",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -416,7 +424,7 @@
           {
             "attempt": 4,
             "afterDelayMs": 5000,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/chatcmpl-853d8693-8ffe-9e4c-abeb-c98367856fe3",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -429,7 +437,7 @@
           {
             "attempt": 5,
             "afterDelayMs": 0,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/853d8693-8ffe-9e4c-abeb-c98367856fe3",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -442,7 +450,7 @@
           {
             "attempt": 6,
             "afterDelayMs": 5000,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/b3287fed-4c4e-9835-802d-a162a5fdbb7c",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/853d8693-8ffe-9e4c-abeb-c98367856fe3",
             "status": 400,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 121,
@@ -455,14 +463,14 @@
           {
             "attempt": 7,
             "afterDelayMs": 0,
-            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/d821b7cd-8b23-4a4c-9186-4d9284fa432d",
+            "url": "https://compute-network-6.integratenetwork.work/v1/proxy/signature/08010f5a-1678-4443-9b71-ae8ac8247b0f",
             "status": 200,
             "contentType": "application/json; charset=utf-8",
             "bodyBytes": 606,
-            "bodyPreview": "{\"text\":\"6c4d35f957e407ef8cb72b990d5436571c19b54a96028896e07ab9c1787b5d5b:35d56393fb54f5c2a1ec6a7a6f7e58db13280a89deb8efa0cfd8e1a5d103f238:centralized:aliyun:9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e\",\"signature\":\"0xf73b8b1ce8830df52cd4955775b95f021a22bd69020373c0d0a5e24543bc655918ed21eee418cec81c0e0bf64871e8489fa7ab996020b1f26fbc7a16039f91a91b\",\"signing_address\":\"0x83df4b8eba7c0b3b740019b8c9a77fff77d508cf\",\"signing_algo\":\"ecdsa\",\"provider_type\":\"centralized\",\"provider_identity\":\"aliyun\",\"tls_cert_fingerprint\":\"9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e\"}",
+            "bodyPreview": "{\"text\":\"6c4d35f957e407ef8cb72b990d5436571c19b54a96028896e07ab9c1787b5d5b:24133800923f113e1f1a32a35657e99bec24fdd4991c06de48d5f8e6ce7d11f6:centralized:aliyun:9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e\",\"signature\":\"0x5bbb7618fd1c47972f124c3343bb7eda3890ace7213a96404402a14e1d074de6090ed06741c4c31afea2c04a4105ff14ccb9a1c76bdcb7d1691a7efe9dc3af461c\",\"signing_address\":\"0x83df4b8eba7c0b3b740019b8c9a77fff77d508cf\",\"signing_algo\":\"ecdsa\",\"provider_type\":\"centralized\",\"provider_identity\":\"aliyun\",\"tls_cert_fingerprint\":\"9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e\"}",
             "parsed": {
-              "text": "6c4d35f957e407ef8cb72b990d5436571c19b54a96028896e07ab9c1787b5d5b:35d56393fb54f5c2a1ec6a7a6f7e58db13280a89deb8efa0cfd8e1a5d103f238:centralized:aliyun:9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e",
-              "signature": "0xf73b8b1ce8830df52cd4955775b95f021a22bd69020373c0d0a5e24543bc655918ed21eee418cec81c0e0bf64871e8489fa7ab996020b1f26fbc7a16039f91a91b",
+              "text": "6c4d35f957e407ef8cb72b990d5436571c19b54a96028896e07ab9c1787b5d5b:24133800923f113e1f1a32a35657e99bec24fdd4991c06de48d5f8e6ce7d11f6:centralized:aliyun:9e621febea357ff4460b91bf8b0b4bfe654d2e100edbc74770e76519d734830e",
+              "signature": "0x5bbb7618fd1c47972f124c3343bb7eda3890ace7213a96404402a14e1d074de6090ed06741c4c31afea2c04a4105ff14ccb9a1c76bdcb7d1691a7efe9dc3af461c",
               "signing_address": "0x83df4b8eba7c0b3b740019b8c9a77fff77d508cf",
               "signing_algo": "ecdsa",
               "provider_type": "centralized",
@@ -481,13 +489,13 @@
           "severity": "info",
           "ours": {
             "file": "packages/shared/src/index.ts",
-            "symbol": "AttributionReceipt.teeSignature",
-            "type": "string (assumed 65-byte ECDSA signature)"
+            "symbol": "AttributionReceipt.computeProof.attestation",
+            "type": "TEEAttestation { text, signature, signing_address, ... } (populated lazily)"
           },
           "actual": {
             "type": "(no signature surfaced in response — verification is async via processResponse + getChatSignatureDownloadLink)"
           },
-          "note": "The TEE signature isn't returned inline. broker.inference.processResponse(provider, chatId, content) verifies it server-side; the raw signature must be fetched via broker.inference.getChatSignatureDownloadLink(provider, chatId). Our AttributionReceipt should store chatId + provider, not a raw signature."
+          "note": "The TEE signature isn't returned inline. broker.inference.processResponse(provider, chatId, content) verifies it server-side; the raw signature must be fetched via broker.inference.getChatSignatureDownloadLink(provider, chatId). AttributionReceipt stores chatId + provider in computeProof; the attestation field is hydrated once the async signature is available."
         }
       ]
     }
@@ -510,27 +518,27 @@
     {
       "severity": "warning",
       "ours": {
-        "file": "packages/shared/src/index.ts",
-        "symbol": "SettlementBatch.daCommitment",
-        "type": "`0x${string}` (bytes32)"
+        "file": "contracts/src/interfaces/IRoyaltySplitter.sol",
+        "symbol": "SettlementBatch.daPointer",
+        "type": "DAPointer { bytes32 commitment; uint64 blobIndex; }"
       },
       "actual": {
         "type": "(no response)"
       },
-      "note": "DA likely returns a KZG commitment + blob index, not a single bytes32. Schema may need a struct.",
+      "note": "Confirm the real DA response carries both a 32-byte commitment and a sequential blob index. If DA returns only a KZG commitment, blobIndex will need to be derived elsewhere.",
       "probe": "da.submit"
     },
     {
       "severity": "info",
       "ours": {
         "file": "packages/shared/src/index.ts",
-        "symbol": "AttributionReceipt.teeSignature",
-        "type": "string (assumed 65-byte ECDSA signature)"
+        "symbol": "AttributionReceipt.computeProof.attestation",
+        "type": "TEEAttestation { text, signature, signing_address, ... } (populated lazily)"
       },
       "actual": {
         "type": "(no signature surfaced in response — verification is async via processResponse + getChatSignatureDownloadLink)"
       },
-      "note": "The TEE signature isn't returned inline. broker.inference.processResponse(provider, chatId, content) verifies it server-side; the raw signature must be fetched via broker.inference.getChatSignatureDownloadLink(provider, chatId). Our AttributionReceipt should store chatId + provider, not a raw signature.",
+      "note": "The TEE signature isn't returned inline. broker.inference.processResponse(provider, chatId, content) verifies it server-side; the raw signature must be fetched via broker.inference.getChatSignatureDownloadLink(provider, chatId). AttributionReceipt stores chatId + provider in computeProof; the attestation field is hydrated once the async signature is available.",
       "probe": "compute.invoke"
     }
   ]

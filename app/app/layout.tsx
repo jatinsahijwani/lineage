@@ -1,30 +1,50 @@
-import type { Metadata } from "next";
-import { Providers } from "@/components/Providers";
-import "./globals.css";
+import type { Metadata } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
+import './globals.css'
+import { Providers } from '@/components/providers'
+
+const _geist = Geist({ subsets: ["latin"] });
+const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Lineage Protocol",
-  description: "Provenance & royalty layer for AI agents on 0G",
-};
+  title: 'Lineage Protocol - AI Infrastructure for Everyone',
+  description: 'The decentralized platform for building, deploying, and monetizing AI models. Fair attribution, real royalties, infinite possibilities.',
+  generator: 'v0.app',
+  icons: {
+    icon: [
+      {
+        url: '/icon-light-32x32.png',
+        media: '(prefers-color-scheme: light)',
+      },
+      {
+        url: '/icon-dark-32x32.png',
+        media: '(prefers-color-scheme: dark)',
+      },
+      {
+        url: '/icon.svg',
+        type: 'image/svg+xml',
+      },
+    ],
+    apple: '/apple-icon.png',
+  },
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f0f0f' },
+  ],
+}
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
   return (
-    <html lang="en">
-      <body>
-        <Providers>
-          <nav className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-            <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-              <a href="/" className="font-bold text-lg text-brand-900">Lineage</a>
-              <div className="flex gap-6 text-sm font-medium">
-                <a href="/mint" className="hover:text-brand-500 transition-colors">Mint iNFT</a>
-                <a href="/demo" className="hover:text-brand-500 transition-colors">Demo</a>
-                <a href="/earnings" className="hover:text-brand-500 transition-colors">Earnings</a>
-              </div>
-            </div>
-          </nav>
-          <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
-        </Providers>
+    <html lang="en" className="dark bg-background">
+      <body className="font-sans antialiased">
+        <Providers>{children}</Providers>
+        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
-  );
+  )
 }

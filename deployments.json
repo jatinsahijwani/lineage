@@ -1,16 +1,15 @@
 {
   "testnet": {
-    "chainId": 16602,
-    "network": "0g-galileo-testnet",
+    "chainId": 16600,
+    "rpc": "https://evmrpc-testnet.0g.ai",
+    "deployedAt": "2026-05-08T09:21:15.220Z",
     "contracts": {
-      "LineageRegistry": "",
-      "DataINFT": "",
-      "ModelINFT": "",
-      "SkillINFT": "",
-      "RoyaltySplitter": "",
-      "AttributionVerifier": ""
-    },
-    "settlementOperator": "",
-    "deployedAt": ""
+      "LineageRegistry": "0x5Ba9010bf4A6E13F098d1ce5DBAF52c22E21B3f5",
+      "DataINFT": "0x7986F719737Cbd377Aa436092a0614bda988F18D",
+      "ModelINFT": "0xb54bcd09aAEfF92369D3f722dC8CBfdD6f861892",
+      "SkillINFT": "0x90135721Bd43e07955CA1AA5DeD4516CDAf46bcB",
+      "AttributionVerifier": "0x74A7D64b84F3D36494f0Abf7641Dd79E9dfb986E",
+      "RoyaltySplitter": "0x4F27E90880E6b28525d7f7Eb8785273F11b0D0DE"
+    }
   }
 }

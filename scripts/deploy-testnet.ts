@@ -15,6 +15,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
+const contractsRoot = resolve(__dirname, "..", "contracts");
 
 // Load .env
 try {
@@ -46,11 +47,13 @@ console.log(`Deploying to: ${rpc}`);
 let output: string;
 try {
   output = execSync(
-    `forge script contracts/script/Deploy.s.sol:Deploy \
+    `forge script script/Deploy.s.sol:Deploy \
       --rpc-url "${rpc}" \
       --broadcast \
+       --legacy \
+      --gas-price 3000000000 \
       --private-key "${privateKey}"`,
-    { cwd: root, encoding: "utf-8" }
+    { cwd: contractsRoot, encoding: "utf-8" }
   );
   console.log(output);
 } catch (e: any) {
