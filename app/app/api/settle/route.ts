@@ -276,6 +276,33 @@ export async function POST(req: Request): Promise<Response> {
       );
     }
 
+    const account = privateKeyToAccount(operatorPrivateKey);
+    const wallet = createWalletClient({
+      account,
+      chain: undefined,
+      transport: http(rpc),
+    });
+
+    // Fund the splitter with the settlement amount so native-OG claims succeed.
+    // postBatch() is not payable, so we send via the contract's receive() fallback
+    // in a separate tx first. totalPayable uses the actual aggregated amounts
+    // (bps math may shave a few wei off totalRevenueWei) so we never over-fund.
+    const totalPayable = payouts.reduce((acc, p) => acc + p.amount, 0n);
+    if (totalPayable > 0n) {
+      const fundTx = await wallet.sendTransaction({
+        to: splitterAddress,
+        value: totalPayable,
+        account,
+        chain: undefined,
+      });
+      await publicClient.waitForTransactionReceipt({
+        hash: fundTx,
+        pollingInterval: 10000,
+        retryCount: 30,
+        timeout: 300_000,
+      });
+    }
+
     // ----- Pick a fresh batchId (must strictly exceed latestBatchId). -----
     const latest = (await publicClient.readContract({
       address: splitterAddress,
@@ -294,12 +321,6 @@ export async function POST(req: Request): Promise<Response> {
     const { root, tree, encodedLeaves } = buildMerkleTree(leaves);
 
     // ----- Submit RoyaltySplitter.postBatch. -----
-    const account = privateKeyToAccount(operatorPrivateKey);
-    const wallet = createWalletClient({
-      account,
-      chain: undefined,
-      transport: http(rpc),
-    });
     const now = BigInt(Math.floor(Date.now() / 1000));
     const txHash = await wallet.writeContract({
       address: splitterAddress,
@@ -310,7 +331,7 @@ export async function POST(req: Request): Promise<Response> {
           batchId,
           merkleRoot: root,
           windowStart: now - 1n,
-          windowEnd: now + 1n,
+          windowEnd: now + 86400n,
           receiptCount: 1n,
           daPointer: {
             commitment:

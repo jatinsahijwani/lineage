@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { AttributionReceipt } from "@lineage/shared";
 
 import { useLineage } from "@/hooks/useLineage";
@@ -103,7 +103,59 @@ function buildDemoAgents(): AgentSpec[] {
   }
 }
 
+/**
+ * Kept exported for backwards compatibility with any consumer that still
+ * imports it; the demo screen itself no longer reads this — see /api/tokens.
+ */
 export const DEMO_AGENTS: AgentSpec[] = buildDemoAgents();
+
+export interface TokenSummary {
+  tokenId: string;
+  owner: string;
+  royaltyBps: number;
+}
+
+export interface AvailableTokens {
+  models: TokenSummary[];
+  skills: TokenSummary[];
+  data: TokenSummary[];
+}
+
+const EMPTY_TOKENS: AvailableTokens = { models: [], skills: [], data: [] };
+
+/**
+ * Best-effort fallback when /api/tokens fails or returns empty. Synthesises
+ * one entry per iType from the static seed manifest so the demo still has
+ * something to display on cold boot.
+ */
+function fallbackFromSeed(): AvailableTokens {
+  const seedAgents = DEMO_AGENTS;
+  if (seedAgents.length === 0) return EMPTY_TOKENS;
+  const out: AvailableTokens = { models: [], skills: [], data: [] };
+  const seen = { model: new Set<string>(), skill: new Set<string>(), data: new Set<string>() };
+  for (const a of seedAgents) {
+    const m = a.modelTokenId.toString();
+    if (!seen.model.has(m)) {
+      seen.model.add(m);
+      out.models.push({ tokenId: m, owner: "", royaltyBps: 0 });
+    }
+    for (const s of a.skills) {
+      const k = s.toString();
+      if (!seen.skill.has(k)) {
+        seen.skill.add(k);
+        out.skills.push({ tokenId: k, owner: "", royaltyBps: 0 });
+      }
+    }
+    for (const d of a.data) {
+      const k = d.toString();
+      if (!seen.data.has(k)) {
+        seen.data.add(k);
+        out.data.push({ tokenId: k, owner: "", royaltyBps: 0 });
+      }
+    }
+  }
+  return out;
+}
 
 /**
  * A single per-recipient row in the Payouts card.
@@ -168,7 +220,116 @@ export function useDemoScreen() {
   const { account, isReady } = useLineage();
   const [status, setStatus] = useState<DemoStatus>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [agent, setAgent] = useState<AgentSpec>(DEMO_AGENTS[0]!);
+
+  const [availableTokens, setAvailableTokens] =
+    useState<AvailableTokens>(EMPTY_TOKENS);
+  const [tokensLoading, setTokensLoading] = useState<boolean>(true);
+  const [tokensError, setTokensError] = useState<string | null>(null);
+
+  const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
+  const [selectedSkillIds, setSelectedSkillIds] = useState<string[]>([]);
+  const [selectedDataIds, setSelectedDataIds] = useState<string[]>([]);
+
+  const refreshTokens = useCallback(async () => {
+    setTokensLoading(true);
+    setTokensError(null);
+    try {
+      const res = await fetch("/api/tokens", { cache: "no-store" });
+      const payload = (await res.json()) as
+        | AvailableTokens
+        | { error: string };
+      if (!res.ok || "error" in payload) {
+        const msg =
+          "error" in payload && payload.error
+            ? payload.error
+            : `failed to load tokens (HTTP ${res.status})`;
+        throw new Error(msg);
+      }
+      const live: AvailableTokens = {
+        models: payload.models,
+        skills: payload.skills,
+        data: payload.data,
+      };
+      const isEmpty =
+        live.models.length === 0 &&
+        live.skills.length === 0 &&
+        live.data.length === 0;
+      if (isEmpty) {
+        const seed = fallbackFromSeed();
+        setAvailableTokens(seed);
+      } else {
+        setAvailableTokens(live);
+      }
+    } catch (err) {
+      console.warn("[/api/tokens] fetch failed, using seed fallback", err);
+      setTokensError(err instanceof Error ? err.message : String(err));
+      setAvailableTokens(fallbackFromSeed());
+    } finally {
+      setTokensLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshTokens();
+  }, [refreshTokens]);
+
+  // Auto-select the first model whenever the set of available models changes
+  // and the current selection no longer matches an on-chain id.
+  useEffect(() => {
+    if (availableTokens.models.length === 0) {
+      if (selectedModelId !== null) setSelectedModelId(null);
+      return;
+    }
+    const stillValid =
+      selectedModelId !== null &&
+      availableTokens.models.some((m) => m.tokenId === selectedModelId);
+    if (!stillValid) {
+      setSelectedModelId(availableTokens.models[0]!.tokenId);
+    }
+  }, [availableTokens.models, selectedModelId]);
+
+  // Prune any stale selections that no longer correspond to an on-chain id.
+  useEffect(() => {
+    const skillIds = new Set(availableTokens.skills.map((s) => s.tokenId));
+    setSelectedSkillIds((prev) => prev.filter((id) => skillIds.has(id)));
+  }, [availableTokens.skills]);
+  useEffect(() => {
+    const dataIds = new Set(availableTokens.data.map((d) => d.tokenId));
+    setSelectedDataIds((prev) => prev.filter((id) => dataIds.has(id)));
+  }, [availableTokens.data]);
+
+  const toggleSkill = useCallback((tokenId: string) => {
+    setSelectedSkillIds((prev) =>
+      prev.includes(tokenId)
+        ? prev.filter((id) => id !== tokenId)
+        : [...prev, tokenId],
+    );
+  }, []);
+  const toggleData = useCallback((tokenId: string) => {
+    setSelectedDataIds((prev) =>
+      prev.includes(tokenId)
+        ? prev.filter((id) => id !== tokenId)
+        : [...prev, tokenId],
+    );
+  }, []);
+
+  /**
+   * Synthesised agent for backwards compatibility — LineageTreeSvg consumes
+   * the AgentSpec shape and we don't want to restyle that component. It's
+   * null when no model is selected (e.g. fresh deploy with zero iNFTs).
+   */
+  const agent: AgentSpec | null = useMemo(() => {
+    if (!selectedModelId) return null;
+    return {
+      id: `live:${selectedModelId}`,
+      name: `Model #${selectedModelId}`,
+      modelTokenId: BigInt(selectedModelId),
+      skills: selectedSkillIds.map((s) => BigInt(s)),
+      data: selectedDataIds.map((d) => BigInt(d)),
+      memory: [],
+    };
+  }, [selectedModelId, selectedSkillIds, selectedDataIds]);
+
   const [prompt, setPrompt] = useState<string>(
     "Summarize today's top story about AI.",
   );
@@ -197,6 +358,10 @@ export function useDemoScreen() {
       setError("Wallet not ready — connect on chainId 16602 first");
       return;
     }
+    if (!selectedModelId) {
+      setError("Pick a model iNFT before running inference");
+      return;
+    }
     setError(null);
     setReceipt(null);
     setPayouts([]);
@@ -221,10 +386,10 @@ export function useDemoScreen() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          modelTokenId: agent.modelTokenId.toString(),
-          skills: agent.skills.map((s) => s.toString()),
-          data: agent.data.map((d) => d.toString()),
-          memory: agent.memory.map((m) => m.toString()),
+          modelTokenId: selectedModelId,
+          skills: selectedSkillIds,
+          data: selectedDataIds,
+          memory: [],
           prompt,
           agentAddress: account,
         }),
@@ -250,7 +415,14 @@ export function useDemoScreen() {
     } finally {
       clearInterval(phaseTimer);
     }
-  }, [account, isReady, agent, prompt]);
+  }, [
+    account,
+    isReady,
+    selectedModelId,
+    selectedSkillIds,
+    selectedDataIds,
+    prompt,
+  ]);
 
   const settle = useCallback(async () => {
     if (!receipt) return;
@@ -320,7 +492,6 @@ export function useDemoScreen() {
     status,
     error,
     agent,
-    setAgent,
     prompt,
     setPrompt,
     receipt,
@@ -332,5 +503,19 @@ export function useDemoScreen() {
     run,
     settle,
     reset,
+
+    // Live on-chain token discovery.
+    availableTokens,
+    tokensLoading,
+    tokensError,
+    refreshTokens,
+
+    // Three-picker selection state.
+    selectedModelId,
+    setSelectedModelId,
+    selectedSkillIds,
+    toggleSkill,
+    selectedDataIds,
+    toggleData,
   };
 }

@@ -1,22 +1,22 @@
 {
   "deployer": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
-  "mintedAt": "2026-05-14T07:45:30.037Z",
+  "mintedAt": "2026-05-14T12:20:53.903Z",
   "tokens": {
     "data": [
       {
-        "id": "33",
+        "id": "38",
         "name": "Alice's News Headlines Dataset",
         "owner": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
         "royaltyBps": 200
       },
       {
-        "id": "34",
+        "id": "39",
         "name": "Bob's Financial Data",
         "owner": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
         "royaltyBps": 300
       },
       {
-        "id": "35",
+        "id": "40",
         "name": "Carol's Sentiment Data",
         "owner": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
         "royaltyBps": 150
@@ -24,7 +24,7 @@
     ],
     "model": [
       {
-        "id": "36",
+        "id": "41",
         "name": "NewsModel-v1",
         "owner": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
         "royaltyBps": 500
@@ -32,7 +32,7 @@
     ],
     "skill": [
       {
-        "id": "37",
+        "id": "42",
         "name": "WebSearch",
         "owner": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
         "royaltyBps": 200
@@ -45,14 +45,14 @@
       "id": "news-summarizer",
       "name": "News Summarizer",
       "description": "Summarises news articles using a web-search skill.",
-      "modelTokenId": "36",
+      "modelTokenId": "41",
       "skills": [
-        "37"
+        "42"
       ],
       "data": [
-        "33",
-        "34",
-        "35"
+        "38",
+        "39",
+        "40"
       ],
       "memory": []
     }

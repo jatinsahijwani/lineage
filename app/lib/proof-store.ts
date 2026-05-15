@@ -40,10 +40,21 @@ export interface ProofPayout {
 type Store = Record<string, ProofRecord[]>;
 
 function storePath(): string {
-  return (
-    process.env["PROOF_STORE_PATH"] ??
-    path.join(process.cwd(), ".proofs.json")
-  );
+  if (process.env["PROOF_STORE_PATH"]) {
+    return process.env["PROOF_STORE_PATH"];
+  }
+  // On Vercel (and other serverless platforms) the project root is read-only.
+  // /tmp is the only writable directory in a serverless function. Note: /tmp
+  // is ephemeral and not shared across function invocations, so proofs written
+  // in /api/settle may not be readable by a later /api/proofs call on a
+  // different cold instance. For production, set PROOF_STORE_PATH to a Redis
+  // URL and swap this implementation for @upstash/redis or similar.
+  const isServerless =
+    process.env["VERCEL"] === "1" ||
+    process.env["AWS_LAMBDA_FUNCTION_NAME"] !== undefined;
+  return isServerless
+    ? "/tmp/.proofs.json"
+    : path.join(process.cwd(), ".proofs.json");
 }
 
 async function readStore(): Promise<Store> {
