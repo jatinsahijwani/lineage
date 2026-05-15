@@ -29,6 +29,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Tell Next.js to trace files one level up (the monorepo root) so that
+  // workspace packages in packages/ and services/ are included in the
+  // serverless function bundles that Vercel deploys.
+  outputFileTracingRoot: path.resolve(__dirname, ".."),
   // Next.js 16 uses Turbopack by default. Turbopack's resolveAlias supports
   // project-relative file paths beginning with "./".
   turbopack: {

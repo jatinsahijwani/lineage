@@ -1,6 +1,6 @@
 {
   "testnet": {
-    "chainId": 16600,
+    "chainId": 16602,
     "rpc": "https://evmrpc-testnet.0g.ai",
     "deployedAt": "2026-05-08T09:21:15.220Z",
     "contracts": {

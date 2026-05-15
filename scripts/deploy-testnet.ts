@@ -88,7 +88,7 @@ try {
 }
 
 deployments.testnet = {
-  chainId: rpc.includes("testnet.0g.ai") ? 16600 : 31337,
+  chainId: rpc.includes("testnet.0g.ai") ? 16602 : 31337,
   rpc,
   deployedAt: new Date().toISOString(),
   contracts,

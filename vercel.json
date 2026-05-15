@@ -1,0 +1,7 @@
+{
+  "framework": "nextjs",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm --filter '@lineage/shared' build && pnpm --filter '@lineage/crypto' build && pnpm --filter '@lineage/sdk' build && pnpm --filter '@lineage/runner' build && pnpm --filter '@lineage/settler' build && cd app && pnpm build",
+  "outputDirectory": "app/.next",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':!*.md'"
+}

@@ -1,12 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { Sparkles, Loader2, AlertTriangle } from "lucide-react";
+import { Sparkles, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
 
 import { GradientBg } from "@/components/shared/GradientBg";
 import { GlowingBadge } from "@/components/shared/GlowingBadge";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -24,15 +26,17 @@ import {
   cardVariants,
 } from "@/lib/animations";
 
-import {
-  DEMO_AGENTS,
-  useDemoScreen,
-  type AgentSpec,
-} from "./_components/useDemoScreen";
+import { useDemoScreen } from "./_components/useDemoScreen";
 import { ReceiptCard } from "./_components/ReceiptCard";
 import { LineageTreeSvg } from "./_components/LineageTreeSvg";
 import { PayoutsCard } from "./_components/PayoutsCard";
 import { VerificationPanel } from "./_components/VerificationPanel";
+
+function shortAddr(addr: string): string {
+  if (!addr) return "";
+  if (addr.length <= 12) return addr;
+  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
+}
 
 const PRIMARY_CTA_CLASS =
   "group inline-flex items-center gap-2 rounded-lg bg-blue-600 px-8 py-3.5 font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-blue-600 disabled:hover:shadow-none";
@@ -106,33 +110,173 @@ export default function DemoPage() {
           >
             <div className="rounded-xl border border-white/10 glass-dark p-6">
               <div className="space-y-5">
+                {/* MODEL — single-select dropdown over live on-chain tokens. */}
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <label className="block text-sm font-medium text-white">
+                      Model
+                    </label>
+                    <button
+                      type="button"
+                      onClick={screen.refreshTokens}
+                      disabled={screen.tokensLoading}
+                      aria-label="Refresh on-chain tokens"
+                      className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/[0.02] text-white/50 transition-colors hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <RefreshCw
+                        className={`h-3 w-3 ${screen.tokensLoading ? "animate-spin" : ""}`}
+                      />
+                    </button>
+                  </div>
+                  {screen.availableTokens.models.length === 0 ? (
+                    screen.tokensLoading ? (
+                      <div className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-white/60">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        Loading on-chain tokens…
+                      </div>
+                    ) : (
+                      <p className="text-xs text-white/50">
+                        No model iNFTs on-chain.{" "}
+                        <Link href="/mint" className="text-blue-300 hover:underline">
+                          Mint one
+                        </Link>
+                        .
+                      </p>
+                    )
+                  ) : (
+                    <Select
+                      value={screen.selectedModelId ?? undefined}
+                      onValueChange={(id) => screen.setSelectedModelId(id)}
+                    >
+                      <SelectTrigger className="w-full bg-white/[0.02] text-white">
+                        <SelectValue placeholder="Pick a model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {screen.availableTokens.models.map((m) => (
+                          <SelectItem key={m.tokenId} value={m.tokenId}>
+                            Model #{m.tokenId}
+                            {m.owner
+                              ? ` (owner ${shortAddr(m.owner)}, ${m.royaltyBps} bps)`
+                              : ""}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+
+                {/* SKILLS — optional multi-select. */}
                 <div>
                   <label className="mb-2 block text-sm font-medium text-white">
-                    Agent
+                    Skills <span className="text-white/40">· optional</span>
                   </label>
-                  <Select
-                    value={screen.agent.id}
-                    onValueChange={(id) => {
-                      const next = DEMO_AGENTS.find((a) => a.id === id);
-                      if (next) screen.setAgent(next as AgentSpec);
-                    }}
-                  >
-                    <SelectTrigger className="w-full bg-white/[0.02] text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DEMO_AGENTS.map((a) => (
-                        <SelectItem key={a.id} value={a.id}>
-                          {a.name} (model #{a.modelTokenId.toString()})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="mt-2 font-mono text-[11px] text-white/40">
-                    model #{screen.agent.modelTokenId.toString()} ·
-                    skills [{screen.agent.skills.map((s) => s.toString()).join(", ") || "none"}]
-                  </p>
+                  {screen.availableTokens.skills.length === 0 ? (
+                    <p className="text-xs text-white/50">
+                      No skill iNFTs minted yet.{" "}
+                      <Link href="/mint" className="text-blue-300 hover:underline">
+                        Mint one
+                      </Link>
+                      .
+                    </p>
+                  ) : (
+                    <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                      {screen.availableTokens.skills.map((s) => {
+                        const checked = screen.selectedSkillIds.includes(s.tokenId);
+                        return (
+                          <li
+                            key={s.tokenId}
+                            className="flex items-center gap-2 rounded-md border border-white/5 bg-white/[0.02] px-2 py-1.5"
+                          >
+                            <Checkbox
+                              id={`skill-${s.tokenId}`}
+                              checked={checked}
+                              onCheckedChange={() => screen.toggleSkill(s.tokenId)}
+                            />
+                            <label
+                              htmlFor={`skill-${s.tokenId}`}
+                              className="cursor-pointer select-none font-mono text-xs text-white/80"
+                            >
+                              #{s.tokenId}
+                              {s.owner ? (
+                                <span className="ml-1 text-white/40">
+                                  {shortAddr(s.owner)} · {s.royaltyBps}bps
+                                </span>
+                              ) : null}
+                            </label>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
                 </div>
+
+                {/* DATA — optional multi-select. */}
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-white">
+                    Data <span className="text-white/40">· optional</span>
+                  </label>
+                  {screen.availableTokens.data.length === 0 ? (
+                    <p className="text-xs text-white/50">
+                      No data iNFTs minted yet.{" "}
+                      <Link href="/mint" className="text-blue-300 hover:underline">
+                        Mint one
+                      </Link>
+                      .
+                    </p>
+                  ) : (
+                    <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                      {screen.availableTokens.data.map((d) => {
+                        const checked = screen.selectedDataIds.includes(d.tokenId);
+                        return (
+                          <li
+                            key={d.tokenId}
+                            className="flex items-center gap-2 rounded-md border border-white/5 bg-white/[0.02] px-2 py-1.5"
+                          >
+                            <Checkbox
+                              id={`data-${d.tokenId}`}
+                              checked={checked}
+                              onCheckedChange={() => screen.toggleData(d.tokenId)}
+                            />
+                            <label
+                              htmlFor={`data-${d.tokenId}`}
+                              className="cursor-pointer select-none font-mono text-xs text-white/80"
+                            >
+                              #{d.tokenId}
+                              {d.owner ? (
+                                <span className="ml-1 text-white/40">
+                                  {shortAddr(d.owner)} · {d.royaltyBps}bps
+                                </span>
+                              ) : null}
+                            </label>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Aggregated cold-start hint when the chain has zero iNFTs. */}
+                {!screen.tokensLoading &&
+                  screen.availableTokens.models.length === 0 &&
+                  screen.availableTokens.skills.length === 0 &&
+                  screen.availableTokens.data.length === 0 && (
+                    <div className="rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-200">
+                      No iNFTs found on-chain.{" "}
+                      <Link
+                        href="/mint"
+                        className="font-medium underline decoration-dotted underline-offset-4 hover:text-amber-100"
+                      >
+                        Mint some from the /mint page first
+                      </Link>
+                      .
+                    </div>
+                  )}
+
+                {screen.tokensError && (
+                  <p className="text-[11px] text-amber-300/80">
+                    on-chain scan warning: {screen.tokensError}
+                  </p>
+                )}
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-white">
@@ -166,7 +310,11 @@ export default function DemoPage() {
                     <button
                       type="button"
                       onClick={screen.run}
-                      disabled={isRunning || !screen.prompt.trim()}
+                      disabled={
+                        isRunning ||
+                        !screen.prompt.trim() ||
+                        !screen.selectedModelId
+                      }
                       className={PRIMARY_CTA_CLASS}
                     >
                       {isRunning ? (
@@ -235,7 +383,16 @@ export default function DemoPage() {
                 </span>
               </div>
               <div className="aspect-[560/260] w-full">
-                <LineageTreeSvg agent={screen.agent} highlights={highlights} />
+                {screen.agent ? (
+                  <LineageTreeSvg
+                    agent={screen.agent}
+                    highlights={highlights}
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-xs text-white/40">
+                    Pick a model to render its lineage graph.
+                  </div>
+                )}
               </div>
             </div>
 
