@@ -283,15 +283,21 @@ export async function POST(req: Request): Promise<Response> {
       transport: http(rpc),
     });
 
-    // Fund the splitter with the settlement amount so native-OG claims succeed.
-    // postBatch() is not payable, so we send via the contract's receive() fallback
-    // in a separate tx first. totalPayable uses the actual aggregated amounts
-    // (bps math may shave a few wei off totalRevenueWei) so we never over-fund.
+    // Fund the splitter only if the user's pre-inference payment didn't fully
+    // cover the aggregated payouts. The user wallet sends 0.001 OG to the
+    // splitter before calling /api/inference, so in the happy path the
+    // contract is already funded and the operator pays zero royalty.
     const totalPayable = payouts.reduce((acc, p) => acc + p.amount, 0n);
-    if (totalPayable > 0n) {
+
+    // Check how much OG is already in the contract (from user's payment)
+    const splitterBalance = await publicClient.getBalance({ address: splitterAddress });
+    const shortfall = totalPayable > splitterBalance ? totalPayable - splitterBalance : 0n;
+
+    if (shortfall > 0n) {
+      // User didn't fully fund — operator covers the gap as fallback
       const fundTx = await wallet.sendTransaction({
         to: splitterAddress,
-        value: totalPayable,
+        value: shortfall,
         account,
         chain: undefined,
       });
@@ -302,6 +308,7 @@ export async function POST(req: Request): Promise<Response> {
         timeout: 300_000,
       });
     }
+    // If shortfall === 0n, user already funded — operator pays zero
 
     // ----- Pick a fresh batchId (must strictly exceed latestBatchId). -----
     const latest = (await publicClient.readContract({

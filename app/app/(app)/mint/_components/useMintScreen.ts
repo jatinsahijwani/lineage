@@ -1,9 +1,92 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { usePublicClient } from "wagmi";
+import { decodeEventLog, type Hex } from "viem";
 import type { EdgeType } from "@lineage/shared";
+import {
+  encrypt,
+  generateKey,
+  sha256,
+  serializeBlob,
+} from "@lineage/crypto";
 
 import { useLineage } from "@/hooks/useLineage";
+import { CONTRACT_ADDRESSES } from "@/lib/contracts";
+import {
+  DATA_INFT_ABI,
+  MODEL_INFT_ABI,
+  SKILL_INFT_ABI,
+  LINEAGE_REGISTRY_ABI,
+} from "@/lib/abis";
+
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000" as const;
+
+const EDGE_TYPE_MAP: Record<string, number> = {
+  TrainedOn: 0,
+  FineTunedFrom: 1,
+  Composes: 2,
+  DependsOn: 3,
+};
+
+function toBase64(bytes: Uint8Array): string {
+  // Browser-safe: avoid Buffer (not in client bundle).
+  let binary = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    const slice = bytes.subarray(i, Math.min(i + chunk, bytes.length));
+    binary += String.fromCharCode(...slice);
+  }
+  return btoa(binary);
+}
+
+async function uploadToStorage(
+  payloadBytes: Uint8Array,
+): Promise<{ rootHash: Hex; txHash: Hex; txSeq: number }> {
+  const res = await fetch("/api/storage-upload", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ payload: toBase64(payloadBytes) }),
+  });
+  const data = (await res.json()) as
+    | { rootHash: Hex; txHash: Hex; txSeq: number }
+    | { error: string };
+  if (!res.ok || "error" in data) {
+    const msg =
+      "error" in data && data.error
+        ? data.error
+        : `0G Storage upload failed (HTTP ${res.status})`;
+    throw new Error(msg);
+  }
+  return data;
+}
+
+/**
+ * Parse the tokenId emitted by LineageRegistry.INFTRegistered in the mint
+ * receipt. The registry event is more reliable than the ERC-721 Transfer log
+ * because Transfer's tokenId topic is the registry-assigned id, which we want
+ * either way — but parsing the named event also validates we hit the right
+ * contract path.
+ */
+function parseTokenId(logs: readonly { address: string; topics: readonly Hex[]; data: Hex }[]): bigint {
+  const registryAddr = CONTRACT_ADDRESSES.LineageRegistry.toLowerCase();
+  for (const log of logs) {
+    if (log.address.toLowerCase() !== registryAddr) continue;
+    try {
+      const decoded = decodeEventLog({
+        abi: LINEAGE_REGISTRY_ABI,
+        data: log.data,
+        topics: log.topics as [Hex, ...Hex[]],
+      });
+      if (decoded.eventName === "INFTRegistered") {
+        return (decoded.args as { tokenId: bigint }).tokenId;
+      }
+    } catch {
+      // not our event — keep scanning
+    }
+  }
+  throw new Error("Could not parse tokenId from mint receipt");
+}
 
 export type MintKind = "data" | "model" | "skill";
 
@@ -34,7 +117,8 @@ const DEFAULT_ROYALTY_BPS: Record<MintKind, number> = {
 };
 
 export function useMintScreen(kind: MintKind) {
-  const { client, account, walletClient, isReady } = useLineage();
+  const { account, walletClient, isReady } = useLineage();
+  const publicClient = usePublicClient();
 
   const [status, setStatus] = useState<MintStatus>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +157,7 @@ export function useMintScreen(kind: MintKind) {
   }, [file, royaltyBps, ownerSplitBps, parents, kind]);
 
   const mint = useCallback(async () => {
-    if (!isReady || !client || !account || !walletClient) {
+    if (!isReady || !account || !walletClient || !publicClient) {
       setError("Wallet not ready — connect on chainId 16602 first");
       setStatus("error");
       return;
@@ -89,70 +173,72 @@ export function useMintScreen(kind: MintKind) {
     setResult(null);
 
     try {
+      // 1. Encrypt locally so plaintext never leaves the browser.
       setStatus("preparing");
       const buffer = await file!.arrayBuffer();
-      const bytes = new Uint8Array(buffer);
+      const plaintext = new Uint8Array(buffer);
 
-      // simulate upload step visually — the SDK's mock storage path doesn't
-      // actually push bytes to 0G Storage in this codebase; the bytes feed
-      // sha256 to derive a storage root.
+      const key = await generateKey();
+      const encrypted = await encrypt(plaintext, key);
+      const serialized = serializeBlob(encrypted);
+      const encryptedMetaHash = await sha256(serialized);
+
+      // 2. POST encrypted bytes to /api/storage-upload — the operator wallet
+      //    pays the 0G Storage fee, mirroring the receipt-upload flow.
       setStatus("uploading");
-      await new Promise((r) => setTimeout(r, 600));
+      const uploaded = await uploadToStorage(serialized);
+      const storageRoot = uploaded.rootHash;
 
+      // 3. Mint on-chain from the user's wallet. We bypass the SDK because it
+      //    computes its own `storageRoot = encrypted.keyHash` and we want the
+      //    real 0G Storage root that resolves to the uploaded blob.
       setStatus("minting");
-      // viem types in the app's node_modules tree are duplicated under two
-      // typescript versions due to pnpm peer-dependency resolution, so the
-      // structurally-identical WalletClient/Account types appear distinct.
-      // Cast at the SDK boundary to bridge the duplication.
-      const wallet = walletClient as unknown as Parameters<
-        typeof client.mintData
-      >[0]["wallet"];
-      const accountObj = {
-        address: account,
-        type: "json-rpc" as const,
-      } as unknown as Parameters<typeof client.mintData>[0]["account"];
 
-      let mintResult: { tokenId: bigint; hash: `0x${string}` };
+      const policy = {
+        totalRoyaltyBps: royaltyBps,
+        paymentToken: ZERO_ADDRESS,
+        pauseUntil: 0n,
+        ownerSplitBps,
+      } as const;
+
+      const parentEdges = parents.map((p) => ({
+        child: 0n,
+        parent: BigInt(p.tokenId),
+        weightBps: p.weightBps,
+        eType: EDGE_TYPE_MAP[p.edgeType] ?? 0,
+      }));
+
+      let inftAddress: `0x${string}`;
+      let abi: typeof DATA_INFT_ABI | typeof MODEL_INFT_ABI | typeof SKILL_INFT_ABI;
       if (kind === "data") {
-        mintResult = await client.mintData({
-          blob: bytes,
-          encrypt: true,
-          royaltyBps,
-          ownerSplitBps,
-          wallet,
-          account: accountObj,
-        });
+        inftAddress = CONTRACT_ADDRESSES.DataINFT;
+        abi = DATA_INFT_ABI;
       } else if (kind === "model") {
-        mintResult = await client.mintModel({
-          weights: bytes,
-          encrypt: true,
-          parents: parents.map((p) => ({
-            tokenId: BigInt(p.tokenId),
-            weightBps: p.weightBps,
-            edgeType: p.edgeType,
-          })),
-          royaltyBps,
-          ownerSplitBps,
-          wallet,
-          account: accountObj,
-        });
+        inftAddress = CONTRACT_ADDRESSES.ModelINFT;
+        abi = MODEL_INFT_ABI;
       } else {
-        mintResult = await client.mintSkill({
-          artifact: bytes,
-          encrypt: true,
-          parents: parents.map((p) => ({
-            tokenId: BigInt(p.tokenId),
-            weightBps: p.weightBps,
-            edgeType: p.edgeType,
-          })),
-          royaltyBps,
-          ownerSplitBps,
-          wallet,
-          account: accountObj,
-        });
+        inftAddress = CONTRACT_ADDRESSES.SkillINFT;
+        abi = SKILL_INFT_ABI;
       }
 
-      setResult({ tokenId: mintResult.tokenId, txHash: mintResult.hash });
+      const hash = await walletClient.writeContract({
+        address: inftAddress,
+        abi,
+        functionName: "mintWithLineage",
+        args: [account, storageRoot, encryptedMetaHash, parentEdges, policy],
+        account,
+        chain: undefined,
+      });
+
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash,
+        pollingInterval: 8000,
+        retryCount: 50,
+        timeout: 480_000,
+      });
+
+      const tokenId = parseTokenId(receipt.logs);
+      setResult({ tokenId, txHash: hash });
       setStatus("success");
     } catch (err) {
       console.error("mint failed", err);
@@ -160,9 +246,9 @@ export function useMintScreen(kind: MintKind) {
       setStatus("error");
     }
   }, [
-    client,
     account,
     walletClient,
+    publicClient,
     isReady,
     file,
     kind,

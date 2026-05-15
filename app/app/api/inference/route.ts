@@ -16,6 +16,7 @@
 
 import { NextResponse } from "next/server";
 import type { Hex } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 import { z } from "zod";
 
 import { ZG_TESTNET } from "@lineage/shared";
@@ -116,12 +117,18 @@ export async function POST(req: Request): Promise<Response> {
     signer: operatorPrivateKey,
   });
 
+  // The receipt's `agentOperator` is the host that SIGNS the receipt — it
+  // must match the address derived from OPERATOR_PRIVATE_KEY (the receipt
+  // builder verifies this and rejects any mismatch). The end-user's wallet
+  // is captured separately in `agentId` so attribution stays end-to-end.
+  const operatorAddress = privateKeyToAccount(operatorPrivateKey).address;
+
   // Compose the WeightedToken graph and the runner request.
   const w = buildWeights(body);
   const request: InferenceRequest = {
     agentId: `agent:${body.agentAddress}`,
     agentRunner: "lineage-frontend",
-    agentOperator: body.agentAddress as `0x${string}`,
+    agentOperator: operatorAddress,
     input: body.prompt,
     model: w.model,
     skills: w.skills,

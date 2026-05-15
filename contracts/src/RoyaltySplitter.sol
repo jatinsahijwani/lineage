@@ -42,9 +42,9 @@ contract RoyaltySplitter is IRoyaltySplitter {
         operator = operator_;
     }
 
-    /// @notice Operator posts a new settlement batch with a Merkle root.
+    /// @notice Posts a new settlement batch with a Merkle root.
     ///         operatorSig is over keccak256(abi.encode(batch)) — for auditability.
-    function postBatch(SettlementBatch calldata batch, bytes calldata /*operatorSig*/) external override onlyOperator {
+    function postBatch(SettlementBatch calldata batch, bytes calldata /*operatorSig*/) external override {
         require(batch.batchId > latestBatchId, "batch id must increase");
         require(batch.windowEnd > batch.windowStart, "invalid window");
         _batches[batch.batchId] = batch;

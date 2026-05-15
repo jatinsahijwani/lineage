@@ -60,18 +60,23 @@ export default function DemoPage() {
   }, [screen.receipt]);
 
   const isRunning =
+    screen.status === "paying" ||
     screen.status === "compute" ||
     screen.status === "attestation" ||
     screen.status === "persisting";
   const isSettling = screen.status === "settling";
+  const canSettle =
+    screen.status === "ready-to-settle" || screen.status === "settling";
   const runningLabel =
-    screen.status === "compute"
-      ? "Calling 0G Compute…"
-      : screen.status === "attestation"
-        ? "Fetching TEE attestation…"
-        : screen.status === "persisting"
-          ? "Persisting receipt…"
-          : "Running…";
+    screen.status === "paying"
+      ? "Approve payment in your wallet…"
+      : screen.status === "compute"
+        ? "Calling 0G Compute…"
+        : screen.status === "attestation"
+          ? "Fetching TEE attestation…"
+          : screen.status === "persisting"
+            ? "Persisting receipt…"
+            : "Running…";
 
   return (
     <GradientBg variant="intense" className="min-h-[calc(100vh-4rem)]">
@@ -312,6 +317,8 @@ export default function DemoPage() {
                       onClick={screen.run}
                       disabled={
                         isRunning ||
+                        canSettle ||
+                        screen.status === "done" ||
                         !screen.prompt.trim() ||
                         !screen.selectedModelId
                       }
@@ -324,15 +331,20 @@ export default function DemoPage() {
                       )}
                       {isRunning ? runningLabel : "Run inference"}
                     </button>
-                    <button
-                      type="button"
-                      onClick={screen.settle}
-                      disabled={!screen.receipt || isSettling}
-                      className={SECONDARY_CTA_CLASS}
-                    >
-                      {isSettling ? "Settling on-chain…" : "Settle now"}
-                    </button>
-                    {screen.receipt && (
+                    {canSettle && (
+                      <button
+                        type="button"
+                        onClick={screen.settle}
+                        disabled={isSettling}
+                        className={SECONDARY_CTA_CLASS}
+                      >
+                        {isSettling ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : null}
+                        {isSettling ? "Posting batch on-chain…" : "Settle now"}
+                      </button>
+                    )}
+                    {screen.receipt && !isSettling && (
                       <button
                         type="button"
                         onClick={screen.reset}
@@ -341,6 +353,27 @@ export default function DemoPage() {
                         Reset
                       </button>
                     )}
+                  </div>
+                )}
+
+                <p className="text-[11px] leading-relaxed text-white/40">
+                  Inference is hosted by a Lineage Agent operator. The host
+                  signs the attribution receipt and pays the 0G Compute + 0G
+                  Storage fees; your wallet pays only the 0.001 OG royalty
+                  pool that streams to every iNFT contributor.
+                </p>
+
+                {screen.paymentTxHash && (
+                  <div className="rounded-lg border border-white/5 bg-white/[0.02] p-3 text-xs text-white/70">
+                    You paid 0.001 OG ·{" "}
+                    <a
+                      href={`${ZG_TESTNET.blockExplorer}/tx/${screen.paymentTxHash}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-mono text-cyan-300 hover:underline"
+                    >
+                      {`${screen.paymentTxHash.slice(0, 10)}…${screen.paymentTxHash.slice(-8)}`}
+                    </a>
                   </div>
                 )}
 
