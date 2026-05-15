@@ -1,0 +1,5 @@
+{
+  "installCommand": "cd .. && pnpm install",
+  "buildCommand": "cd .. && pnpm --filter '@lineage/shared' build && pnpm --filter '@lineage/crypto' build && pnpm --filter '@lineage/sdk' build && pnpm --filter '@lineage/runner' build && pnpm --filter '@lineage/settler' build && pnpm build",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':!*.md'"
+}
