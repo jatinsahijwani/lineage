@@ -1,0 +1,6 @@
+{
+  "framework": "nextjs",
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "buildCommand": "pnpm --filter '@lineage/shared' build && pnpm --filter '@lineage/crypto' build && pnpm --filter '@lineage/sdk' build && pnpm --filter '@lineage/runner' build && pnpm --filter '@lineage/settler' build && pnpm --filter my-project build",
+  "outputDirectory": "app/.next"
+}
