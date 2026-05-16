@@ -2,14 +2,34 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { BookOpen, Github } from "lucide-react";
 
 import { LineageConnectButton } from "@/components/connect-button";
+import { XIcon } from "@/components/icons/XIcon";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/mint", label: "Mint", chapter: "01" },
   { href: "/demo", label: "Demo", chapter: "02" },
   { href: "/earnings", label: "Earnings", chapter: "03" },
+] as const;
+
+const EXTERNAL_LINKS = [
+  {
+    href: "https://lineage-5.gitbook.io/lineage/",
+    label: "Docs",
+    icon: BookOpen,
+  },
+  {
+    href: "https://github.com/jatinsahijwani/lineage",
+    label: "GitHub",
+    icon: Github,
+  },
+  {
+    href: "https://x.com/lineage_0g",
+    label: "X",
+    icon: XIcon,
+  },
 ] as const;
 
 /**
@@ -77,7 +97,25 @@ export function SiteNav() {
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <nav
+            aria-label="External links"
+            className="hidden items-center border-r border-rule pr-3 md:flex"
+          >
+            {EXTERNAL_LINKS.map(({ href, label, icon: Icon }) => (
+              <a
+                key={href}
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={label}
+                title={label}
+                className="inline-flex h-8 w-8 items-center justify-center text-paper-faint transition-colors hover:text-copper"
+              >
+                <Icon className="h-[15px] w-[15px]" />
+              </a>
+            ))}
+          </nav>
           <LineageConnectButton />
         </div>
       </div>

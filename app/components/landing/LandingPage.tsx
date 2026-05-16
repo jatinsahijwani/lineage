@@ -10,7 +10,7 @@
 
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, BookOpen, Github } from "lucide-react";
 
 import { ZG_MAINNET, ZG_TESTNET } from "@lineage/shared";
 import {
@@ -22,6 +22,7 @@ import {
   Section,
   Stat,
 } from "@/components/editorial";
+import { XIcon } from "@/components/icons/XIcon";
 
 interface TokenSet {
   models: { tokenId: string }[];
@@ -465,7 +466,7 @@ export function LandingPage() {
       {/* ── Colophon ──────────────────────────────────────────────────── */}
       <footer className="mt-20 border-t border-rule bg-ink-deep">
         <PageWrap>
-          <div className="grid grid-cols-12 gap-6 py-12 lg:py-16">
+          <div className="grid grid-cols-12 gap-x-6 gap-y-10 py-12 lg:py-16">
             <div className="col-span-12 lg:col-span-5">
               <p
                 className="display text-3xl text-paper"
@@ -483,18 +484,63 @@ export function LandingPage() {
                 <Badge>Galileo 16602</Badge>
                 <Badge>MIT</Badge>
               </div>
+              <div className="mt-8 flex items-center gap-2">
+                <a
+                  href="https://github.com/jatinsahijwani/lineage"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="GitHub"
+                  title="Source on GitHub"
+                  className="inline-flex h-10 w-10 items-center justify-center border border-rule text-paper-dim transition-colors hover:border-copper hover:text-copper"
+                >
+                  <Github className="h-4 w-4" />
+                </a>
+                <a
+                  href="https://lineage-5.gitbook.io/lineage/"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Documentation"
+                  title="Docs on GitBook"
+                  className="inline-flex h-10 w-10 items-center justify-center border border-rule text-paper-dim transition-colors hover:border-copper hover:text-copper"
+                >
+                  <BookOpen className="h-4 w-4" />
+                </a>
+                <a
+                  href="https://x.com/lineage_0g"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="X · @lineage_0g"
+                  title="@lineage_0g on X"
+                  className="inline-flex h-10 w-10 items-center justify-center border border-rule text-paper-dim transition-colors hover:border-copper hover:text-copper"
+                >
+                  <XIcon size={15} />
+                </a>
+              </div>
             </div>
-            <div className="col-span-6 lg:col-span-3 lg:col-start-8">
+
+            <div className="col-span-6 lg:col-span-3 lg:col-start-7">
               <div className="label mb-3">Read</div>
-              <ul className="space-y-2 text-sm">
+              <ul className="space-y-2.5 text-sm">
                 <li>
                   <a
                     href="https://github.com/jatinsahijwani/lineage"
                     target="_blank"
                     rel="noreferrer"
-                    className="link-copper"
+                    className="link-copper inline-flex items-baseline gap-2"
                   >
+                    <Github className="h-3.5 w-3.5 self-center text-paper-faint" />
                     Source &amp; README ↗
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://lineage-5.gitbook.io/lineage/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="link-copper inline-flex items-baseline gap-2"
+                  >
+                    <BookOpen className="h-3.5 w-3.5 self-center text-paper-faint" />
+                    Protocol docs ↗
                   </a>
                 </li>
                 <li>
@@ -509,9 +555,27 @@ export function LandingPage() {
                 </li>
               </ul>
             </div>
-            <div className="col-span-6 lg:col-span-3">
+
+            <div className="col-span-6 lg:col-span-2">
+              <div className="label mb-3">Follow</div>
+              <ul className="space-y-2.5 text-sm">
+                <li>
+                  <a
+                    href="https://x.com/lineage_0g"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="link-copper inline-flex items-baseline gap-2"
+                  >
+                    <XIcon size={13} className="self-center text-paper-faint" />
+                    @lineage_0g ↗
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div className="col-span-12 lg:col-span-2">
               <div className="label mb-3">Use</div>
-              <ul className="space-y-2 text-sm">
+              <ul className="space-y-2.5 text-sm">
                 <li>
                   <a href="/mint" className="link-copper">
                     §01 Mint
