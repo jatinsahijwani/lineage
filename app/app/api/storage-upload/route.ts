@@ -19,15 +19,18 @@ import { z } from "zod";
 
 import { ZG_TESTNET } from "@lineage/shared";
 
+import { getNetwork } from "@/lib/network";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const BodySchema = z.object({
   payload: z.string().min(1),
+  chainId: z.number().int().positive().optional(),
 });
 
 export async function POST(req: Request): Promise<Response> {
-  let body: { payload: string };
+  let body: { payload: string; chainId?: number };
   try {
     body = BodySchema.parse(await req.json());
   } catch (err) {
@@ -45,9 +48,15 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  const rpc = process.env["ZERO_G_RPC_URL"] ?? ZG_TESTNET.rpcUrl;
-  const storageUrl =
-    process.env["ZERO_G_STORAGE_URL"] ?? ZG_TESTNET.storageIndexerUrl;
+  const network = getNetwork(body.chainId ?? ZG_TESTNET.chainId);
+  if (!network) {
+    return NextResponse.json(
+      { error: `unsupported chainId ${body.chainId}` },
+      { status: 400 },
+    );
+  }
+  const rpc = network.rpcUrl;
+  const storageUrl = network.storageIndexerUrl;
 
   let bytes: Buffer;
   try {

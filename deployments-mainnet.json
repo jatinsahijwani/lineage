@@ -1,0 +1,16 @@
+{
+  "mainnet": {
+    "chainId": 16661,
+    "rpc": "https://evmrpc.0g.ai",
+    "deployedAt": "2026-05-16T08:17:50.558Z",
+    "deployer": "0xbc74Ce51239F0165C931D72464bBbf8360aeA0C3",
+    "contracts": {
+      "LineageRegistry": "0x7A6cce656a00aD3e763337d8F944F9DB350261C7",
+      "DataINFT": "0x59DA753Ba0209717f992e7a16f9f9488CfE7ECD2",
+      "ModelINFT": "0xc7CfEEb82aAb351359B8AaD5c5522b346567Ee79",
+      "SkillINFT": "0x9Ad28591ab82Ca78F0DecB0E6F532a23B8B72B3A",
+      "AttributionVerifier": "0x2F3137CE12d67207d81267ed9d404094c50D14C2",
+      "RoyaltySplitter": "0x690835584988f2bF28a3e819965FD9dD18D9A8DB"
+    }
+  }
+}

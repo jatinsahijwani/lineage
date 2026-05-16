@@ -12,7 +12,6 @@ import {
 } from "@lineage/crypto";
 
 import { useLineage } from "@/hooks/useLineage";
-import { CONTRACT_ADDRESSES } from "@/lib/contracts";
 import {
   DATA_INFT_ABI,
   MODEL_INFT_ABI,
@@ -42,11 +41,12 @@ function toBase64(bytes: Uint8Array): string {
 
 async function uploadToStorage(
   payloadBytes: Uint8Array,
+  chainId: number | undefined,
 ): Promise<{ rootHash: Hex; txHash: Hex; txSeq: number }> {
   const res = await fetch("/api/storage-upload", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ payload: toBase64(payloadBytes) }),
+    body: JSON.stringify({ payload: toBase64(payloadBytes), chainId }),
   });
   const data = (await res.json()) as
     | { rootHash: Hex; txHash: Hex; txSeq: number }
@@ -68,8 +68,11 @@ async function uploadToStorage(
  * either way — but parsing the named event also validates we hit the right
  * contract path.
  */
-function parseTokenId(logs: readonly { address: string; topics: readonly Hex[]; data: Hex }[]): bigint {
-  const registryAddr = CONTRACT_ADDRESSES.LineageRegistry.toLowerCase();
+function parseTokenId(
+  logs: readonly { address: string; topics: readonly Hex[]; data: Hex }[],
+  registryAddress: `0x${string}`,
+): bigint {
+  const registryAddr = registryAddress.toLowerCase();
   for (const log of logs) {
     if (log.address.toLowerCase() !== registryAddr) continue;
     try {
@@ -117,7 +120,7 @@ const DEFAULT_ROYALTY_BPS: Record<MintKind, number> = {
 };
 
 export function useMintScreen(kind: MintKind) {
-  const { account, walletClient, isReady } = useLineage();
+  const { account, walletClient, isReady, network } = useLineage();
   const publicClient = usePublicClient();
 
   const [status, setStatus] = useState<MintStatus>("idle");
@@ -157,8 +160,18 @@ export function useMintScreen(kind: MintKind) {
   }, [file, royaltyBps, ownerSplitBps, parents, kind]);
 
   const mint = useCallback(async () => {
-    if (!isReady || !account || !walletClient || !publicClient) {
-      setError("Wallet not ready — connect on chainId 16602 first");
+    if (!isReady || !account || !walletClient || !publicClient || !network) {
+      setError("Wallet not ready — connect on 0G Mainnet or Galileo Testnet");
+      setStatus("error");
+      return;
+    }
+    if (
+      network.contracts.LineageRegistry ===
+      "0x0000000000000000000000000000000000000000"
+    ) {
+      setError(
+        `Lineage contracts not yet deployed on ${network.name}. Switch to a network where they are deployed.`,
+      );
       setStatus("error");
       return;
     }
@@ -186,7 +199,7 @@ export function useMintScreen(kind: MintKind) {
       // 2. POST encrypted bytes to /api/storage-upload — the operator wallet
       //    pays the 0G Storage fee, mirroring the receipt-upload flow.
       setStatus("uploading");
-      const uploaded = await uploadToStorage(serialized);
+      const uploaded = await uploadToStorage(serialized, network.chainId);
       const storageRoot = uploaded.rootHash;
 
       // 3. Mint on-chain from the user's wallet. We bypass the SDK because it
@@ -211,13 +224,13 @@ export function useMintScreen(kind: MintKind) {
       let inftAddress: `0x${string}`;
       let abi: typeof DATA_INFT_ABI | typeof MODEL_INFT_ABI | typeof SKILL_INFT_ABI;
       if (kind === "data") {
-        inftAddress = CONTRACT_ADDRESSES.DataINFT;
+        inftAddress = network.contracts.DataINFT;
         abi = DATA_INFT_ABI;
       } else if (kind === "model") {
-        inftAddress = CONTRACT_ADDRESSES.ModelINFT;
+        inftAddress = network.contracts.ModelINFT;
         abi = MODEL_INFT_ABI;
       } else {
-        inftAddress = CONTRACT_ADDRESSES.SkillINFT;
+        inftAddress = network.contracts.SkillINFT;
         abi = SKILL_INFT_ABI;
       }
 
@@ -237,7 +250,7 @@ export function useMintScreen(kind: MintKind) {
         timeout: 480_000,
       });
 
-      const tokenId = parseTokenId(receipt.logs);
+      const tokenId = parseTokenId(receipt.logs, network.contracts.LineageRegistry);
       setResult({ tokenId, txHash: hash });
       setStatus("success");
     } catch (err) {
@@ -256,6 +269,7 @@ export function useMintScreen(kind: MintKind) {
     royaltyBps,
     ownerSplitBps,
     validate,
+    network,
   ]);
 
   return {

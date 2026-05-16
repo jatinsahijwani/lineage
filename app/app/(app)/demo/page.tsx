@@ -45,8 +45,12 @@ const SECONDARY_CTA_CLASS =
   "inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-medium text-white transition-all hover:border-white/20 hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-50";
 
 export default function DemoPage() {
-  const { isConnected, chainOk } = useLineage();
+  const { isConnected, chainOk, chain, network } = useLineage();
   const screen = useDemoScreen();
+  const explorerUrl =
+    chain?.blockExplorers?.default?.url ??
+    network?.blockExplorer ??
+    ZG_TESTNET.blockExplorer;
 
   const highlights = useMemo(() => {
     if (!screen.receipt) {
@@ -305,8 +309,8 @@ export default function DemoPage() {
                 {!isConnected || !chainOk ? (
                   <div className="flex flex-col items-start gap-3 rounded-lg border border-white/10 bg-white/[0.02] p-4">
                     <p className="text-sm text-white/70">
-                      Connect a wallet on {ZG_TESTNET.name} (chainId{" "}
-                      {ZG_TESTNET.chainId}) to run inference.
+                      Connect a wallet on 0G Mainnet or 0G Galileo Testnet
+                      to run inference.
                     </p>
                     <LineageConnectButton />
                   </div>
@@ -367,7 +371,7 @@ export default function DemoPage() {
                   <div className="rounded-lg border border-white/5 bg-white/[0.02] p-3 text-xs text-white/70">
                     You paid 0.001 OG ·{" "}
                     <a
-                      href={`${ZG_TESTNET.blockExplorer}/tx/${screen.paymentTxHash}`}
+                      href={`${explorerUrl}/tx/${screen.paymentTxHash}`}
                       target="_blank"
                       rel="noreferrer"
                       className="font-mono text-cyan-300 hover:underline"

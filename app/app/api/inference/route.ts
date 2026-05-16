@@ -27,6 +27,8 @@ import {
 } from "@lineage/runner/inference.js";
 import { StorageReceiptSink } from "@lineage/runner/receipt-sink.js";
 
+import { getNetwork } from "@/lib/network";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -37,6 +39,7 @@ const BodySchema = z.object({
   memory: z.array(z.string().min(1)).default([]),
   prompt: z.string().min(1),
   agentAddress: z.string().regex(/^0x[0-9a-fA-F]{40}$/),
+  chainId: z.number().int().positive().optional(),
 });
 
 type Body = z.infer<typeof BodySchema>;
@@ -97,11 +100,20 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  const rpc = process.env["ZERO_G_RPC_URL"] ?? ZG_TESTNET.rpcUrl;
-  const storageUrl =
-    process.env["ZERO_G_STORAGE_URL"] ?? ZG_TESTNET.storageIndexerUrl;
+  const network = getNetwork(body.chainId ?? ZG_TESTNET.chainId);
+  if (!network) {
+    return NextResponse.json(
+      { error: `unsupported chainId ${body.chainId}` },
+      { status: 400 },
+    );
+  }
+  const rpc = network.rpcUrl;
+  const storageUrl = network.storageIndexerUrl;
   const computeUrl =
-    process.env["ZERO_G_COMPUTE_URL"] ?? "https://compute-testnet.0g.ai";
+    process.env["ZERO_G_COMPUTE_URL"] ??
+    (network.isTestnet
+      ? "https://compute-testnet.0g.ai"
+      : "https://compute.0g.ai");
 
   const config: InferenceConfig = {
     computeUrl,

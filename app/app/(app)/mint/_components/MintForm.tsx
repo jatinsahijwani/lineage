@@ -34,9 +34,13 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export function MintForm({ kind, title, description }: MintFormProps) {
-  const { isConnected, chainOk } = useLineage();
+  const { isConnected, chainOk, chain, network } = useLineage();
   const screen = useMintScreen(kind);
   const showParents = kind !== "data";
+  const explorerUrl =
+    chain?.blockExplorers?.default?.url ??
+    network?.blockExplorer ??
+    ZG_TESTNET.blockExplorer;
 
   const inFlight =
     screen.status === "preparing" ||
@@ -57,7 +61,7 @@ export function MintForm({ kind, title, description }: MintFormProps) {
           <p className="text-sm text-white/60">
             {!isConnected
               ? "Connect a wallet to begin."
-              : `Switch to ${ZG_TESTNET.name} (chainId ${ZG_TESTNET.chainId}) to continue.`}
+              : "Switch to 0G Mainnet or 0G Galileo Testnet to continue."}
           </p>
           <LineageConnectButton />
         </div>
@@ -89,7 +93,7 @@ export function MintForm({ kind, title, description }: MintFormProps) {
               <div className="min-w-0">
                 <div className="text-white/40">Tx hash</div>
                 <a
-                  href={`${ZG_TESTNET.blockExplorer}/tx/${screen.result.txHash}`}
+                  href={`${explorerUrl}/tx/${screen.result.txHash}`}
                   target="_blank"
                   rel="noreferrer"
                   className="mt-1 block truncate text-cyan-300 hover:underline"
@@ -109,7 +113,7 @@ export function MintForm({ kind, title, description }: MintFormProps) {
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </button>
             <a
-              href={`${ZG_TESTNET.blockExplorer}/tx/${screen.result.txHash}`}
+              href={`${explorerUrl}/tx/${screen.result.txHash}`}
               target="_blank"
               rel="noreferrer"
               className="text-sm text-white/60 hover:text-white"

@@ -32,12 +32,15 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { z } from "zod";
+import { Redis } from "@upstash/redis";
 
 import {
   AttributionReceiptSchema,
   ZG_TESTNET,
   type AttributionReceipt,
 } from "@lineage/shared";
+
+import { getNetwork } from "@/lib/network";
 import { aggregateReceipts } from "@lineage/settler/attribute.js";
 import { buildMerkleTree, getProof } from "@lineage/settler/merkle.js";
 import type { LineageNode } from "@lineage/sdk/lineage-graph.js";
@@ -128,6 +131,7 @@ const SPLITTER_ABI = [
 
 const BodySchema = z.object({
   receipt: AttributionReceiptSchema,
+  chainId: z.number().int().positive().optional(),
 });
 
 interface RegistryRecord {
@@ -153,6 +157,79 @@ function jsonSafe<T>(value: T): unknown {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Per-wallet rate limit. Redis-backed (Upstash / Vercel KV) when configured so
+// it survives across Vercel cold starts; falls back to an in-memory Map for
+// local dev. Sliding 24h window via a sorted set of request timestamps.
+// ---------------------------------------------------------------------------
+
+const RATE_LIMIT_PER_WALLET = 5;
+const RATE_WINDOW_MS = 24 * 60 * 60 * 1000;
+const RATE_WINDOW_SECONDS = 24 * 60 * 60;
+
+const localRateLog = new Map<string, number[]>();
+
+let cachedRedis: Redis | null | undefined;
+function getRateLimitRedis(): Redis | null {
+  if (cachedRedis !== undefined) return cachedRedis;
+  const url =
+    process.env["KV_REST_API_URL"] ?? process.env["UPSTASH_REDIS_REST_URL"];
+  const token =
+    process.env["KV_REST_API_TOKEN"] ?? process.env["UPSTASH_REDIS_REST_TOKEN"];
+  cachedRedis = url && token ? new Redis({ url, token }) : null;
+  return cachedRedis;
+}
+
+/**
+ * Extracts the wallet address from receipt.agentId. The inference route writes
+ * `agent:0x...`; if the prefix is missing we fall back to the whole string so
+ * we still get a stable per-source key (better than silently shared bucket).
+ */
+function rateLimitKeyFromReceipt(receipt: AttributionReceipt): string {
+  const id = (receipt.agentId ?? "").trim();
+  const stripped = id.startsWith("agent:") ? id.slice("agent:".length) : id;
+  return stripped.toLowerCase();
+}
+
+async function checkAndIncrementRateLimit(
+  walletKey: string,
+): Promise<{ allowed: boolean; remaining: number }> {
+  if (!walletKey) return { allowed: false, remaining: 0 };
+  const now = Date.now();
+  const cutoff = now - RATE_WINDOW_MS;
+  const redisKey = `ratelimit:settle:${walletKey}`;
+
+  const redis = getRateLimitRedis();
+  if (redis) {
+    // Sliding window via ZSET. Drop entries older than 24h, count remaining,
+    // and add the current timestamp (with a small random suffix so two
+    // requests in the same millisecond don't collide on the member value).
+    await redis.zremrangebyscore(redisKey, 0, cutoff);
+    const count = await redis.zcard(redisKey);
+    if (count >= RATE_LIMIT_PER_WALLET) {
+      return { allowed: false, remaining: 0 };
+    }
+    await redis.zadd(redisKey, {
+      score: now,
+      member: `${now}-${Math.random().toString(36).slice(2, 10)}`,
+    });
+    await redis.expire(redisKey, RATE_WINDOW_SECONDS);
+    return {
+      allowed: true,
+      remaining: RATE_LIMIT_PER_WALLET - (count + 1),
+    };
+  }
+
+  // In-memory fallback (local dev, single process).
+  const recent = (localRateLog.get(walletKey) ?? []).filter((t) => t > cutoff);
+  if (recent.length >= RATE_LIMIT_PER_WALLET) {
+    return { allowed: false, remaining: 0 };
+  }
+  recent.push(now);
+  localRateLog.set(walletKey, recent);
+  return { allowed: true, remaining: RATE_LIMIT_PER_WALLET - recent.length };
+}
+
 export async function POST(req: Request): Promise<Response> {
   let parsed: z.infer<typeof BodySchema>;
   try {
@@ -165,6 +242,21 @@ export async function POST(req: Request): Promise<Response> {
   }
   const receipt = parsed.receipt as AttributionReceipt;
 
+  const walletKey = rateLimitKeyFromReceipt(receipt);
+  if (!walletKey) {
+    return NextResponse.json(
+      { error: "receipt.agentId is missing — cannot rate-limit request" },
+      { status: 400 },
+    );
+  }
+  const { allowed } = await checkAndIncrementRateLimit(walletKey);
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Max 5 inferences per wallet per 24 hours." },
+      { status: 429 },
+    );
+  }
+
   const operatorPrivateKey = process.env["OPERATOR_PRIVATE_KEY"] as
     | Hex
     | undefined;
@@ -175,23 +267,28 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  const registryAddress = process.env[
-    "NEXT_PUBLIC_LINEAGE_REGISTRY_ADDRESS"
-  ] as Hex | undefined;
-  const splitterAddress = process.env[
-    "NEXT_PUBLIC_ROYALTY_SPLITTER_ADDRESS"
-  ] as Hex | undefined;
-  if (!registryAddress || !splitterAddress) {
+  const network = getNetwork(parsed.chainId ?? ZG_TESTNET.chainId);
+  if (!network) {
+    return NextResponse.json(
+      { error: `unsupported chainId ${parsed.chainId}` },
+      { status: 400 },
+    );
+  }
+  const registryAddress = network.contracts.LineageRegistry as Hex;
+  const splitterAddress = network.contracts.RoyaltySplitter as Hex;
+  if (
+    registryAddress === "0x0000000000000000000000000000000000000000" ||
+    splitterAddress === "0x0000000000000000000000000000000000000000"
+  ) {
     return NextResponse.json(
       {
-        error:
-          "missing NEXT_PUBLIC_LINEAGE_REGISTRY_ADDRESS or NEXT_PUBLIC_ROYALTY_SPLITTER_ADDRESS",
+        error: `contracts not deployed for chainId ${network.chainId} — set NEXT_PUBLIC_*_${network.isTestnet ? "" : "MAINNET_"}ADDRESS env vars`,
       },
       { status: 500 },
     );
   }
 
-  const rpc = process.env["ZERO_G_RPC_URL"] ?? ZG_TESTNET.rpcUrl;
+  const rpc = network.rpcUrl;
   const totalRevenueWei = BigInt(
     process.env["DEMO_TOTAL_REVENUE_WEI"] ?? "1000000000000000",
   );

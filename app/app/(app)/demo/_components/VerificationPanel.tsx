@@ -28,6 +28,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
+import { useAccount } from "wagmi";
+
 import { ZG_TESTNET, type AttributionReceipt } from "@lineage/shared";
 
 import type { DemoDaPointer, DemoSettleResult } from "./useDemoScreen";
@@ -44,7 +46,10 @@ interface VerificationPanelProps {
   operatorAddress?: `0x${string}` | null;
 }
 
-const EXPLORER_BASE = ZG_TESTNET.blockExplorer;
+function useExplorerBase(): string {
+  const { chain } = useAccount();
+  return chain?.blockExplorers?.default?.url ?? ZG_TESTNET.blockExplorer;
+}
 
 function trunc(value: string, head = 6, tail = 4): string {
   if (!value) return "";
@@ -159,6 +164,7 @@ export function VerificationPanel({
   settleResult,
   operatorAddress,
 }: VerificationPanelProps) {
+  const EXPLORER_BASE = useExplorerBase();
   const attestation = receipt?.computeProof.attestation ?? null;
   // The TEE-signed `text` field IS the canonical 5-field colon-joined message
   // per @lineage/shared TEEAttestation comment: "<inputHash>:<outputHash>:

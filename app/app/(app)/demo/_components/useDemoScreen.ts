@@ -113,7 +113,7 @@ interface ApiSettleResponse {
 }
 
 export function useDemoScreen() {
-  const { account, isReady } = useLineage();
+  const { account, isReady, chainId, network } = useLineage();
   const { sendTransactionAsync } = useSendTransaction();
   const [status, setStatus] = useState<DemoStatus>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -132,7 +132,10 @@ export function useDemoScreen() {
     setTokensLoading(true);
     setTokensError(null);
     try {
-      const res = await fetch("/api/tokens", { cache: "no-store" });
+      const tokensUrl = chainId
+        ? `/api/tokens?chainId=${chainId}`
+        : "/api/tokens";
+      const res = await fetch(tokensUrl, { cache: "no-store" });
       const payload = (await res.json()) as
         | AvailableTokens
         | { error: string };
@@ -154,7 +157,7 @@ export function useDemoScreen() {
     } finally {
       setTokensLoading(false);
     }
-  }, []);
+  }, [chainId]);
 
   useEffect(() => {
     void refreshTokens();
@@ -261,8 +264,17 @@ export function useDemoScreen() {
     setSettleResult(null);
     setPaymentTxHash(null);
 
-    const splitterAddress = process.env
-      .NEXT_PUBLIC_ROYALTY_SPLITTER_ADDRESS as `0x${string}`;
+    if (!network) {
+      setError("Unsupported chain — switch to 0G Mainnet or Galileo Testnet");
+      return;
+    }
+    const splitterAddress = network.contracts.RoyaltySplitter;
+    if (splitterAddress === "0x0000000000000000000000000000000000000000") {
+      setError(
+        `Lineage contracts not yet deployed on ${network.name}. Switch to a network where they are deployed.`,
+      );
+      return;
+    }
 
     try {
       // Step 1: User pays inference fee from their own wallet to RoyaltySplitter
@@ -295,6 +307,7 @@ export function useDemoScreen() {
             memory: agent.memory.map((m) => m.toString()),
             prompt,
             agentAddress: account,
+            chainId: network.chainId,
           }),
         });
         const raw = (await res.json()) as
@@ -319,7 +332,7 @@ export function useDemoScreen() {
       setError(err instanceof Error ? err.message : String(err));
       setStatus("idle");
     }
-  }, [account, isReady, agent, prompt, sendTransactionAsync]);
+  }, [account, isReady, agent, prompt, sendTransactionAsync, network]);
 
   const settle = useCallback(async () => {
     if (!receipt) {
@@ -332,7 +345,10 @@ export function useDemoScreen() {
       const res = await fetch("/api/settle", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ receipt }),
+        body: JSON.stringify({
+          receipt,
+          chainId: network?.chainId,
+        }),
       });
       const payload = (await res.json()) as
         | ApiSettleResponse
@@ -379,7 +395,7 @@ export function useDemoScreen() {
       // Stay at ready-to-settle so the user can retry without re-paying.
       setStatus("ready-to-settle");
     }
-  }, [receipt]);
+  }, [receipt, network]);
 
   return {
     status,

@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 export * from "./0g-testnet.js";
+export * from "./0g-mainnet.js";
 
 export type INFTType = "Data" | "Model" | "Skill" | "Agent";
 export type EdgeType = "TrainedOn" | "FineTunedFrom" | "Composes" | "DependsOn";

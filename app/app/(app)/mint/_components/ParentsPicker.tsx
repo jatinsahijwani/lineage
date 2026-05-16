@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { decodeEventLog, type Log } from "viem";
-import { usePublicClient } from "wagmi";
+import { useAccount, usePublicClient } from "wagmi";
 import type { EdgeType } from "@lineage/shared";
 import { Plus, Trash2 } from "lucide-react";
 
@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CONTRACT_ADDRESSES } from "@/lib/contracts";
+import { getContractsForChain } from "@/lib/network";
 import { LINEAGE_REGISTRY_ABI } from "@/lib/abis";
 import type { ParentEntry } from "./useMintScreen";
 
@@ -44,6 +44,8 @@ const I_TYPE_LABELS: Record<number, string> = {
 
 export function ParentsPicker({ parents, onChange }: ParentsPickerProps) {
   const publicClient = usePublicClient();
+  const { chainId } = useAccount();
+  const registryAddress = getContractsForChain(chainId).LineageRegistry;
   const [known, setKnown] = useState<KnownINFT[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [draftId, setDraftId] = useState<string>("");
@@ -59,7 +61,7 @@ export function ParentsPicker({ parents, onChange }: ParentsPickerProps) {
         const fromBlock =
           latest > 50_000n ? latest - 50_000n : 0n;
         const logs: Log[] = await publicClient.getLogs({
-          address: CONTRACT_ADDRESSES.LineageRegistry,
+          address: registryAddress,
           fromBlock,
           toBlock: latest,
           // Filter by event name via decode-after; getLogs `event` typing is finicky cross-versions
@@ -107,7 +109,7 @@ export function ParentsPicker({ parents, onChange }: ParentsPickerProps) {
     return () => {
       cancelled = true;
     };
-  }, [publicClient]);
+  }, [publicClient, registryAddress]);
 
   const totalWeight = useMemo(
     () => parents.reduce((s, p) => s + p.weightBps, 0),

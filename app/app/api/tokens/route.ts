@@ -16,6 +16,8 @@ import { createPublicClient, http, type Hex } from "viem";
 
 import { ZG_TESTNET } from "@lineage/shared";
 
+import { getNetwork } from "@/lib/network";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -69,18 +71,28 @@ interface INFTRecord {
   paused: boolean;
 }
 
-export async function GET(): Promise<Response> {
-  const registryAddress = process.env[
-    "NEXT_PUBLIC_LINEAGE_REGISTRY_ADDRESS"
-  ] as Hex | undefined;
-  if (!registryAddress) {
+export async function GET(req: Request): Promise<Response> {
+  const url = new URL(req.url);
+  const chainIdRaw = url.searchParams.get("chainId");
+  const chainId = chainIdRaw ? Number(chainIdRaw) : ZG_TESTNET.chainId;
+  const network = getNetwork(chainId);
+  if (!network) {
     return NextResponse.json(
-      { error: "NEXT_PUBLIC_LINEAGE_REGISTRY_ADDRESS missing" },
-      { status: 500 },
+      { error: `unsupported chainId ${chainId}` },
+      { status: 400 },
+    );
+  }
+  const registryAddress = network.contracts.LineageRegistry as Hex;
+  if (registryAddress === "0x0000000000000000000000000000000000000000") {
+    // No contracts yet on this chain — return an empty token set rather than
+    // 500'ing so the demo UI can render the "no models yet" empty state.
+    return NextResponse.json(
+      { models: [], skills: [], data: [] },
+      { headers: { "Cache-Control": "no-store" } },
     );
   }
 
-  const rpc = process.env["ZERO_G_RPC_URL"] ?? ZG_TESTNET.rpcUrl;
+  const rpc = network.rpcUrl;
 
   try {
     const publicClient = createPublicClient({

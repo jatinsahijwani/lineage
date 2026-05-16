@@ -79,9 +79,16 @@ function formatPostedAt(iso: string): string {
 }
 
 export default function EarningsPage() {
-  const { client, account, isConnected, chainOk } = useLineage();
+  const { client, account, isConnected, chainOk, network, chain } = useLineage();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
+
+  const splitterAddress =
+    network?.contracts.RoyaltySplitter ?? CONTRACT_ADDRESSES.RoyaltySplitter;
+  const explorerUrl =
+    chain?.blockExplorers?.default?.url ??
+    network?.blockExplorer ??
+    ZG_TESTNET.blockExplorer;
 
   const [claimed, setClaimed] = useState<bigint | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -110,7 +117,7 @@ export default function EarningsPage() {
     setLoadError(null);
     try {
       const v = (await publicClient.readContract({
-        address: CONTRACT_ADDRESSES.RoyaltySplitter,
+        address: splitterAddress,
         abi: ROYALTY_SPLITTER_ABI,
         functionName: "balanceOf",
         args: [account, ZERO_TOKEN],
@@ -301,8 +308,8 @@ export default function EarningsPage() {
           >
             <div className="flex flex-col items-start gap-4">
               <p className="text-sm text-white/70">
-                Connect a wallet on {ZG_TESTNET.name} (chainId{" "}
-                {ZG_TESTNET.chainId}) to view your claimable balance.
+                Connect a wallet on 0G Mainnet or 0G Galileo Testnet to view
+                your claimable balance.
               </p>
               <LineageConnectButton />
             </div>
@@ -448,7 +455,7 @@ export default function EarningsPage() {
                           </div>
                           <div className="flex items-center justify-between gap-3">
                             <a
-                              href={`${ZG_TESTNET.blockExplorer}/tx/${p.txHash}`}
+                              href={`${explorerUrl}/tx/${p.txHash}`}
                               target="_blank"
                               rel="noreferrer"
                               className="font-mono text-[10px] text-white/40 hover:text-white/70"
@@ -530,7 +537,7 @@ export default function EarningsPage() {
                       <div className="mt-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3 text-xs text-emerald-200">
                         Claim submitted ·{" "}
                         <a
-                          href={`${ZG_TESTNET.blockExplorer}/tx/${claimTx}`}
+                          href={`${explorerUrl}/tx/${claimTx}`}
                           target="_blank"
                           rel="noreferrer"
                           className="font-mono text-emerald-300 hover:underline"
