@@ -3,14 +3,14 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { ChevronDown } from "lucide-react";
 
-const PRIMARY_CTA_CLASS =
-  "group inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25";
+const PILL =
+  "inline-flex items-center gap-2 border border-rule px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-paper transition-colors hover:border-rule-strong hover:text-copper-bright";
 
-const WARN_CTA_CLASS =
-  "inline-flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm font-semibold text-red-300 transition-all hover:bg-red-500/20";
+const PRIMARY =
+  "inline-flex items-center gap-2 border border-copper bg-copper px-5 py-2 font-mono text-[11px] uppercase tracking-[0.22em] text-ink transition-colors hover:bg-copper-bright hover:border-copper-bright";
 
-const GLASS_PILL_CLASS =
-  "inline-flex items-center gap-2 rounded-lg glass-dark border border-white/10 px-3.5 py-2 text-sm font-medium text-white transition-all hover:border-white/20";
+const WARN =
+  "inline-flex items-center gap-2 border border-rust/40 bg-rust/10 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-rust transition-colors hover:bg-rust/20";
 
 function shortAddress(addr: string): string {
   if (!addr || addr.length < 10) return addr ?? "";
@@ -53,9 +53,9 @@ export function LineageConnectButton() {
                   <button
                     type="button"
                     onClick={openConnectModal}
-                    className={PRIMARY_CTA_CLASS}
+                    className={PRIMARY}
                   >
-                    Connect Wallet
+                    Connect wallet
                   </button>
                 );
               }
@@ -65,35 +65,38 @@ export function LineageConnectButton() {
                   <button
                     type="button"
                     onClick={openChainModal}
-                    className={WARN_CTA_CLASS}
+                    className={WARN}
                   >
                     Wrong network
                   </button>
                 );
               }
 
+              // RainbowKit's chain object doesn't expose `testnet` here, so
+              // we infer from chainId (Galileo testnet = 16602).
+              const isTestnet = chain.id === 16602;
               return (
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={openChainModal}
-                    className={GLASS_PILL_CLASS}
+                    className={PILL}
                   >
                     <span
-                      className="inline-block h-2 w-2 rounded-full bg-emerald-400"
+                      className={`inline-block h-1.5 w-1.5 rounded-full ${isTestnet ? "bg-copper" : "bg-moss"}`}
                       aria-hidden
                     />
-                    <span className="text-white/80">{chain.name}</span>
+                    <span className="hidden sm:inline">{chain.name}</span>
                   </button>
                   <button
                     type="button"
                     onClick={openAccountModal}
-                    className={GLASS_PILL_CLASS}
+                    className={PILL}
                   >
-                    <span className="font-mono">
+                    <span className="tabular">
                       {shortAddress(account.address)}
                     </span>
-                    <ChevronDown className="h-4 w-4 text-white/60" />
+                    <ChevronDown className="h-3 w-3 text-paper-faint" />
                   </button>
                 </div>
               );

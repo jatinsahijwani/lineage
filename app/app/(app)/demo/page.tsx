@@ -2,11 +2,8 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { Sparkles, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
+import { AlertTriangle, RefreshCw, ArrowUpRight } from "lucide-react";
 
-import { GradientBg } from "@/components/shared/GradientBg";
-import { GlowingBadge } from "@/components/shared/GlowingBadge";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -20,11 +17,13 @@ import { LineageConnectButton } from "@/components/connect-button";
 import { useLineage } from "@/hooks/useLineage";
 import { ZG_TESTNET } from "@lineage/shared";
 import {
-  titleVariants,
-  subtitleVariants,
-  containerVariants,
-  cardVariants,
-} from "@/lib/animations";
+  Badge,
+  Button,
+  Chapter,
+  Field,
+  Marginalia,
+  PageWrap,
+} from "@/components/editorial";
 
 import { useDemoScreen } from "./_components/useDemoScreen";
 import { ReceiptCard } from "./_components/ReceiptCard";
@@ -37,12 +36,6 @@ function shortAddr(addr: string): string {
   if (addr.length <= 12) return addr;
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
 }
-
-const PRIMARY_CTA_CLASS =
-  "group inline-flex items-center gap-2 rounded-lg bg-blue-600 px-8 py-3.5 font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-blue-600 disabled:hover:shadow-none";
-
-const SECONDARY_CTA_CLASS =
-  "inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-medium text-white transition-all hover:border-white/20 hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-50";
 
 export default function DemoPage() {
   const { isConnected, chainOk, chain, network } = useLineage();
@@ -73,91 +66,80 @@ export default function DemoPage() {
     screen.status === "ready-to-settle" || screen.status === "settling";
   const runningLabel =
     screen.status === "paying"
-      ? "Approve payment in your wallet…"
+      ? "Approve payment"
       : screen.status === "compute"
-        ? "Calling 0G Compute…"
+        ? "Calling 0G Compute"
         : screen.status === "attestation"
-          ? "Fetching TEE attestation…"
+          ? "Fetching TEE attestation"
           : screen.status === "persisting"
-            ? "Persisting receipt…"
-            : "Running…";
+            ? "Persisting receipt"
+            : "Running";
 
   return (
-    <GradientBg variant="intense" className="min-h-[calc(100vh-4rem)]">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          className="mb-10 flex flex-col gap-3"
-        >
-          <motion.div variants={subtitleVariants}>
-            <GlowingBadge variant="purple">Live demo</GlowingBadge>
-          </motion.div>
-          <motion.h1
-            variants={titleVariants}
-            className="text-balance text-4xl font-semibold tracking-tight text-white md:text-5xl"
-          >
-            Run inference. Watch attribution flow.
-          </motion.h1>
-          <motion.p
-            variants={subtitleVariants}
-            className="max-w-2xl text-balance text-base text-white/60"
-          >
-            Pick an agent, send a prompt. The signed receipt arrives, the
-            lineage graph lights up, and royalties stream to every contributor
-            in real time.
-          </motion.p>
-        </motion.div>
+    <div className="pb-24 lg:pb-32">
+      <PageWrap>
+        <Chapter
+          number="02"
+          eyebrow="The inference"
+          title={
+            <>
+              Run an inference.{" "}
+              <em className="font-display italic text-copper">Watch attribution flow.</em>
+            </>
+          }
+          lede="Pick a model and any composed skills or data. Pay 0.001 OG. The agent host runs the inference inside a TEE, signs a receipt, and persists it to 0G Storage. Then settle the batch on-chain — every contributor's address is in the Merkle tree."
+          marginalia={
+            <Marginalia>
+              <p className="mb-2 text-copper">The host's role</p>
+              <p>
+                Inference is hosted by a Lineage Agent operator. The host signs
+                the attribution receipt and pays the 0G Compute &amp; 0G Storage
+                fees. Your wallet pays only the 0.001 OG royalty pool that
+                streams to every iNFT contributor in the lineage.
+              </p>
+            </Marginalia>
+          }
+        />
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
-          {/* LEFT */}
-          <motion.div
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            className="lg:col-span-5"
-          >
-            <div className="rounded-xl border border-white/10 glass-dark p-6">
-              <div className="space-y-5">
-                {/* MODEL — single-select dropdown over live on-chain tokens. */}
-                <div>
-                  <div className="mb-2 flex items-center justify-between">
-                    <label className="block text-sm font-medium text-white">
-                      Model
-                    </label>
-                    <button
-                      type="button"
-                      onClick={screen.refreshTokens}
-                      disabled={screen.tokensLoading}
-                      aria-label="Refresh on-chain tokens"
-                      className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-white/10 bg-white/[0.02] text-white/50 transition-colors hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <RefreshCw
-                        className={`h-3 w-3 ${screen.tokensLoading ? "animate-spin" : ""}`}
-                      />
-                    </button>
-                  </div>
+        <div className="mt-16 grid grid-cols-12 gap-x-6 gap-y-12">
+          {/* ─── LEFT: composer ─────────────────────────────────────── */}
+          <div className="col-span-12 lg:col-span-5">
+            <div className="editorial-card">
+              <div className="flex items-center justify-between border-b border-rule px-6 py-3 lg:px-8">
+                <span className="label label-copper">Compose the call</span>
+                <button
+                  type="button"
+                  onClick={screen.refreshTokens}
+                  disabled={screen.tokensLoading}
+                  aria-label="Refresh on-chain tokens"
+                  className="inline-flex h-7 w-7 items-center justify-center border border-rule text-paper-faint transition-colors hover:border-copper hover:text-copper disabled:opacity-50"
+                >
+                  <RefreshCw
+                    className={`h-3 w-3 ${screen.tokensLoading ? "animate-spin" : ""}`}
+                  />
+                </button>
+              </div>
+
+              <div className="space-y-8 p-6 lg:p-8">
+                {/* Model select */}
+                <Field label="Model" meta="single select">
                   {screen.availableTokens.models.length === 0 ? (
-                    screen.tokensLoading ? (
-                      <div className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.02] px-3 py-2 text-sm text-white/60">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        Loading on-chain tokens…
-                      </div>
-                    ) : (
-                      <p className="text-xs text-white/50">
-                        No model iNFTs on-chain.{" "}
-                        <Link href="/mint" className="text-blue-300 hover:underline">
-                          Mint one
+                    <p className="font-mono text-[11px] text-paper-faint">
+                      {screen.tokensLoading
+                        ? "Scanning registry…"
+                        : "No model iNFTs on this network. "}
+                      {!screen.tokensLoading && (
+                        <Link href="/mint" className="link-copper">
+                          Mint one ↗
                         </Link>
-                        .
-                      </p>
-                    )
+                      )}
+                    </p>
                   ) : (
                     <Select
                       value={screen.selectedModelId ?? undefined}
                       onValueChange={(id) => screen.setSelectedModelId(id)}
                     >
-                      <SelectTrigger className="w-full bg-white/[0.02] text-white">
+                      <SelectTrigger className="h-11 w-full rounded-none border-0 border-b border-rule bg-transparent px-0 font-mono text-sm text-paper hover:border-copper focus:border-copper focus:ring-0">
                         <SelectValue placeholder="Pick a model" />
                       </SelectTrigger>
                       <SelectContent>
@@ -172,29 +154,26 @@ export default function DemoPage() {
                       </SelectContent>
                     </Select>
                   )}
-                </div>
+                </Field>
 
-                {/* SKILLS — optional multi-select. */}
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-white">
-                    Skills <span className="text-white/40">· optional</span>
-                  </label>
-                  {screen.availableTokens.skills.length === 0 ? (
-                    <p className="text-xs text-white/50">
-                      No skill iNFTs minted yet.{" "}
-                      <Link href="/mint" className="text-blue-300 hover:underline">
-                        Mint one
-                      </Link>
-                      .
-                    </p>
-                  ) : (
-                    <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                {/* Skills multi-select */}
+                <Field
+                  label="Skills"
+                  meta="optional · multi-select"
+                  hint={
+                    screen.availableTokens.skills.length === 0
+                      ? "No skill iNFTs on this network."
+                      : undefined
+                  }
+                >
+                  {screen.availableTokens.skills.length > 0 && (
+                    <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                       {screen.availableTokens.skills.map((s) => {
                         const checked = screen.selectedSkillIds.includes(s.tokenId);
                         return (
                           <li
                             key={s.tokenId}
-                            className="flex items-center gap-2 rounded-md border border-white/5 bg-white/[0.02] px-2 py-1.5"
+                            className="flex items-center gap-2 border border-rule px-3 py-2"
                           >
                             <Checkbox
                               id={`skill-${s.tokenId}`}
@@ -203,43 +182,45 @@ export default function DemoPage() {
                             />
                             <label
                               htmlFor={`skill-${s.tokenId}`}
-                              className="cursor-pointer select-none font-mono text-xs text-white/80"
+                              className="flex cursor-pointer select-none flex-col gap-0.5"
                             >
-                              #{s.tokenId}
-                              {s.owner ? (
-                                <span className="ml-1 text-white/40">
-                                  {shortAddr(s.owner)} · {s.royaltyBps}bps
+                              <span className="font-mono text-sm text-paper tabular">
+                                #{s.tokenId}
+                              </span>
+                              {s.owner && (
+                                <span className="font-mono text-[11px] tabular text-paper-dim">
+                                  {shortAddr(s.owner)} ·{" "}
+                                  <span className="text-copper">
+                                    {s.royaltyBps}bps
+                                  </span>
                                 </span>
-                              ) : null}
+                              )}
                             </label>
                           </li>
                         );
                       })}
                     </ul>
                   )}
-                </div>
+                </Field>
 
-                {/* DATA — optional multi-select. */}
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-white">
-                    Data <span className="text-white/40">· optional</span>
-                  </label>
-                  {screen.availableTokens.data.length === 0 ? (
-                    <p className="text-xs text-white/50">
-                      No data iNFTs minted yet.{" "}
-                      <Link href="/mint" className="text-blue-300 hover:underline">
-                        Mint one
-                      </Link>
-                      .
-                    </p>
-                  ) : (
-                    <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+                {/* Data multi-select */}
+                <Field
+                  label="Data"
+                  meta="optional · multi-select"
+                  hint={
+                    screen.availableTokens.data.length === 0
+                      ? "No data iNFTs on this network."
+                      : undefined
+                  }
+                >
+                  {screen.availableTokens.data.length > 0 && (
+                    <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                       {screen.availableTokens.data.map((d) => {
                         const checked = screen.selectedDataIds.includes(d.tokenId);
                         return (
                           <li
                             key={d.tokenId}
-                            className="flex items-center gap-2 rounded-md border border-white/5 bg-white/[0.02] px-2 py-1.5"
+                            className="flex items-center gap-2 border border-rule px-3 py-2"
                           >
                             <Checkbox
                               id={`data-${d.tokenId}`}
@@ -248,75 +229,89 @@ export default function DemoPage() {
                             />
                             <label
                               htmlFor={`data-${d.tokenId}`}
-                              className="cursor-pointer select-none font-mono text-xs text-white/80"
+                              className="flex cursor-pointer select-none flex-col gap-0.5"
                             >
-                              #{d.tokenId}
-                              {d.owner ? (
-                                <span className="ml-1 text-white/40">
-                                  {shortAddr(d.owner)} · {d.royaltyBps}bps
+                              <span className="font-mono text-sm text-paper tabular">
+                                #{d.tokenId}
+                              </span>
+                              {d.owner && (
+                                <span className="font-mono text-[11px] tabular text-paper-dim">
+                                  {shortAddr(d.owner)} ·{" "}
+                                  <span className="text-copper">
+                                    {d.royaltyBps}bps
+                                  </span>
                                 </span>
-                              ) : null}
+                              )}
                             </label>
                           </li>
                         );
                       })}
                     </ul>
                   )}
-                </div>
+                </Field>
 
-                {/* Aggregated cold-start hint when the chain has zero iNFTs. */}
+                {/* Cold-start empty state */}
                 {!screen.tokensLoading &&
                   screen.availableTokens.models.length === 0 &&
                   screen.availableTokens.skills.length === 0 &&
                   screen.availableTokens.data.length === 0 && (
-                    <div className="rounded-md border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-200">
-                      No iNFTs found on-chain.{" "}
-                      <Link
-                        href="/mint"
-                        className="font-medium underline decoration-dotted underline-offset-4 hover:text-amber-100"
-                      >
-                        Mint some from the /mint page first
-                      </Link>
-                      .
+                    <div className="border border-copper/40 bg-copper/5 p-4">
+                      <span className="label label-copper">No iNFTs minted on this chain.</span>
+                      <p className="mt-2 text-sm leading-relaxed text-paper-dim">
+                        Head to{" "}
+                        <Link href="/mint" className="link-copper">
+                          §01 · Mint
+                        </Link>{" "}
+                        and create one — yours or any wallet's — then return.
+                      </p>
                     </div>
                   )}
 
                 {screen.tokensError && (
-                  <p className="text-[11px] text-amber-300/80">
+                  <p className="font-mono text-[11px] text-rust">
                     on-chain scan warning: {screen.tokensError}
                   </p>
                 )}
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-white">
-                    Prompt
-                  </label>
+                {/* Prompt */}
+                <Field label="Prompt" meta="the input">
                   <Textarea
                     rows={4}
                     value={screen.prompt}
                     onChange={(e) => screen.setPrompt(e.target.value)}
-                    className="min-h-28 bg-white/[0.02] text-white"
+                    className="min-h-28 rounded-none border-0 border-b border-rule bg-transparent px-0 font-mono text-sm text-paper placeholder:text-paper-faint focus-visible:border-copper focus-visible:ring-0"
                   />
-                </div>
+                </Field>
 
+                {/* Error */}
                 {screen.error && (
-                  <div className="flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-sm text-red-200">
-                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-                    <div className="break-words">{screen.error}</div>
+                  <div className="border border-rust/40 bg-rust/5 p-4">
+                    <div className="mb-2 flex items-center gap-2">
+                      <AlertTriangle className="h-3.5 w-3.5 text-rust" />
+                      <span className="label" style={{ color: "var(--rust)" }}>
+                        Halted
+                      </span>
+                    </div>
+                    <p className="break-words font-mono text-xs leading-relaxed text-paper">
+                      {screen.error}
+                    </p>
                   </div>
                 )}
 
+                {/* Connection gate vs CTAs */}
                 {!isConnected || !chainOk ? (
-                  <div className="flex flex-col items-start gap-3 rounded-lg border border-white/10 bg-white/[0.02] p-4">
-                    <p className="text-sm text-white/70">
-                      Connect a wallet on 0G Mainnet or 0G Galileo Testnet
-                      to run inference.
+                  <div className="border border-rule p-5">
+                    <p className="text-sm text-paper-dim">
+                      Connect a wallet on 0G Mainnet or 0G Galileo Testnet to
+                      run inference.
                     </p>
-                    <LineageConnectButton />
+                    <div className="mt-4">
+                      <LineageConnectButton />
+                    </div>
                   </div>
                 ) : (
-                  <div className="flex flex-wrap items-center gap-3 pt-1">
-                    <button
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button
                       type="button"
                       onClick={screen.run}
                       disabled={
@@ -326,33 +321,30 @@ export default function DemoPage() {
                         !screen.prompt.trim() ||
                         !screen.selectedModelId
                       }
-                      className={PRIMARY_CTA_CLASS}
+                      loading={isRunning}
+                      variant="primary"
+                      size="lg"
                     >
-                      {isRunning ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Sparkles className="h-4 w-4" />
-                      )}
                       {isRunning ? runningLabel : "Run inference"}
-                    </button>
+                      {!isRunning && <ArrowUpRight className="h-3.5 w-3.5" />}
+                    </Button>
                     {canSettle && (
-                      <button
+                      <Button
                         type="button"
                         onClick={screen.settle}
                         disabled={isSettling}
-                        className={SECONDARY_CTA_CLASS}
+                        loading={isSettling}
+                        variant="secondary"
+                        size="lg"
                       >
-                        {isSettling ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : null}
-                        {isSettling ? "Posting batch on-chain…" : "Settle now"}
-                      </button>
+                        {isSettling ? "Posting batch" : "Settle now"}
+                      </Button>
                     )}
                     {screen.receipt && !isSettling && (
                       <button
                         type="button"
                         onClick={screen.reset}
-                        className="text-sm text-white/50 hover:text-white"
+                        className="font-mono text-[11px] uppercase tracking-[0.2em] text-paper-faint transition-colors hover:text-paper"
                       >
                         Reset
                       </button>
@@ -360,48 +352,40 @@ export default function DemoPage() {
                   </div>
                 )}
 
-                <p className="text-[11px] leading-relaxed text-white/40">
-                  Inference is hosted by a Lineage Agent operator. The host
-                  signs the attribution receipt and pays the 0G Compute + 0G
-                  Storage fees; your wallet pays only the 0.001 OG royalty
-                  pool that streams to every iNFT contributor.
-                </p>
-
+                {/* Payment hash */}
                 {screen.paymentTxHash && (
-                  <div className="rounded-lg border border-white/5 bg-white/[0.02] p-3 text-xs text-white/70">
-                    You paid 0.001 OG ·{" "}
-                    <a
-                      href={`${explorerUrl}/tx/${screen.paymentTxHash}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="font-mono text-cyan-300 hover:underline"
-                    >
-                      {`${screen.paymentTxHash.slice(0, 10)}…${screen.paymentTxHash.slice(-8)}`}
-                    </a>
+                  <div className="border-t border-rule pt-4">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="label">Payment</span>
+                      <a
+                        href={`${explorerUrl}/tx/${screen.paymentTxHash}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="link-copper font-mono text-xs tabular"
+                      >
+                        0.001 OG · {`${screen.paymentTxHash.slice(0, 8)}…${screen.paymentTxHash.slice(-6)}`}
+                      </a>
+                    </div>
                   </div>
                 )}
 
+                {/* Output preview */}
                 {screen.output && (
-                  <div className="rounded-lg border border-white/5 bg-white/[0.02] p-3">
-                    <div className="mb-1 font-mono text-[10px] uppercase tracking-wider text-white/40">
-                      TEE-verified output
+                  <div className="border border-rule">
+                    <div className="border-b border-rule px-4 py-2">
+                      <span className="label label-copper">TEE-verified output</span>
                     </div>
-                    <div className="break-words text-sm text-white/80">
-                      {screen.output}
+                    <div className="break-words p-4 font-display italic text-base leading-relaxed text-paper">
+                      "{screen.output}"
                     </div>
                   </div>
                 )}
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* RIGHT */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="space-y-6 lg:col-span-7"
-          >
+          {/* ─── RIGHT: receipt, lineage graph, payouts ──────────────── */}
+          <div className="col-span-12 space-y-8 lg:col-span-7">
             <ReceiptCard receipt={screen.receipt} status={screen.status} />
 
             <VerificationPanel
@@ -410,33 +394,42 @@ export default function DemoPage() {
               settleResult={screen.settleResult}
             />
 
-            <div className="rounded-xl border border-white/10 glass-dark p-6">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                  Lineage Graph
-                </h3>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-white/40">
-                  data → model ← skills
-                </span>
+            <div className="editorial-card">
+              <div className="flex items-center justify-between border-b border-rule px-6 py-3 lg:px-8">
+                <span className="label">Lineage graph</span>
+                <span className="label text-paper-faint">data → model ← skills</span>
               </div>
-              <div className="aspect-[560/260] w-full">
+              <div className="aspect-[560/260] w-full p-2">
                 {screen.agent ? (
-                  <LineageTreeSvg
-                    agent={screen.agent}
-                    highlights={highlights}
-                  />
+                  <LineageTreeSvg agent={screen.agent} highlights={highlights} />
                 ) : (
-                  <div className="flex h-full items-center justify-center text-xs text-white/40">
-                    Pick a model to render its lineage graph.
+                  <div className="flex h-full items-center justify-center font-display italic text-base text-paper-faint">
+                    Pick a model to render its lineage.
                   </div>
                 )}
               </div>
             </div>
 
             <PayoutsCard payouts={screen.payouts} />
-          </motion.div>
+
+            {/* Status footer */}
+            <div className="flex flex-wrap items-baseline justify-between gap-2 border-t border-rule pt-4">
+              <span className="label">Status</span>
+              <Badge
+                tone={
+                  screen.status === "done"
+                    ? "moss"
+                    : screen.status === "idle"
+                      ? "default"
+                      : "copper"
+                }
+              >
+                {screen.status === "done" ? "settled" : screen.status}
+              </Badge>
+            </div>
+          </div>
         </div>
-      </div>
-    </GradientBg>
+      </PageWrap>
+    </div>
   );
 }

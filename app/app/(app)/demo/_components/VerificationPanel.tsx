@@ -129,11 +129,13 @@ function Row({
   children: React.ReactNode;
 }) {
   return (
-    <li className="flex flex-col gap-1.5 rounded-md border border-white/5 bg-white/[0.02] px-3 py-2.5">
-      <span className="font-mono text-[10px] uppercase tracking-wider text-white/40">
+    <li className="grid grid-cols-12 gap-x-4 py-3">
+      <span className="col-span-12 font-mono text-[10px] uppercase tracking-[0.22em] text-paper-faint sm:col-span-4">
         {label}
       </span>
-      <div className="min-w-0 break-all">{children}</div>
+      <div className="col-span-12 min-w-0 break-all text-paper sm:col-span-8">
+        {children}
+      </div>
     </li>
   );
 }
@@ -150,7 +152,7 @@ function ExplorerLink({
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex items-center gap-1 font-mono text-xs text-blue-300 transition-colors hover:text-blue-200 hover:underline"
+      className="link-copper inline-flex items-baseline gap-1 font-mono text-xs tabular"
     >
       {children}
       <ExternalLink className="h-3 w-3 shrink-0 opacity-60" />
@@ -191,17 +193,15 @@ export function VerificationPanel({
   if (!hasAnything) return null;
 
   return (
-    <div className="rounded-xl border border-white/10 glass-dark p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-white/80">
-          Verification
-        </h3>
-        <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-white/40">
+    <article className="editorial-card">
+      <div className="flex items-center justify-between border-b border-rule px-6 py-3 lg:px-8">
+        <span className="label label-copper">Verification — the appendix</span>
+        <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.22em] text-paper-faint">
           <ShieldCheck className="h-3 w-3" /> dual-attestation
         </span>
       </div>
 
-      <ul className="space-y-2">
+      <ul className="divide-y divide-rule px-6 lg:px-8">
         {daPointer && (
           <Row label="Storage root">
             <code className="font-mono text-xs text-white">
@@ -234,36 +234,36 @@ export function VerificationPanel({
         {signature && teeSigningAddress && (
           <Row label="TEE signature">
             {verify.kind === "pending" && (
-              <div className="inline-flex items-center gap-2 text-xs text-white/60">
+              <div className="inline-flex items-center gap-2 font-mono text-xs text-paper-dim">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 Verifying…
               </div>
             )}
             {verify.kind === "ok" && (
-              <div className="inline-flex items-center gap-2 text-xs text-emerald-300">
+              <div className="inline-flex items-center gap-2 font-mono text-xs" style={{ color: "var(--moss)" }}>
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 Signature verified
               </div>
             )}
             {verify.kind === "mismatch" && (
               <div className="flex flex-col gap-1">
-                <div className="inline-flex items-center gap-2 text-xs text-red-300">
+                <div className="inline-flex items-center gap-2 font-mono text-xs" style={{ color: "var(--rust)" }}>
                   <XCircle className="h-3.5 w-3.5" />
                   Signature mismatch
                 </div>
-                <code className="font-mono text-[10px] text-white/40">
+                <code className="font-mono text-[10px] text-paper-faint">
                   recovered {trunc(verify.recovered, 10, 6)}
                 </code>
               </div>
             )}
             {verify.kind === "error" && (
-              <div className="inline-flex items-center gap-2 text-xs text-amber-300">
+              <div className="inline-flex items-center gap-2 font-mono text-xs text-copper">
                 <XCircle className="h-3.5 w-3.5" />
                 Verification error · {verify.message}
               </div>
             )}
             {verify.kind === "idle" && (
-              <div className="text-xs text-white/40">No signature to verify.</div>
+              <div className="font-mono text-xs text-paper-faint">No signature to verify.</div>
             )}
           </Row>
         )}
@@ -289,6 +289,6 @@ export function VerificationPanel({
           </Row>
         )}
       </ul>
-    </div>
+    </article>
   );
 }

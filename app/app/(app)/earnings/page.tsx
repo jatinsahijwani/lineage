@@ -1,21 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { formatEther } from "viem";
 import { usePublicClient, useWalletClient } from "wagmi";
 import {
-  Coins,
   AlertTriangle,
   Loader2,
-  ArrowRight,
+  ArrowUpRight,
   RefreshCw,
   CheckCircle2,
 } from "lucide-react";
 import { ZG_TESTNET } from "@lineage/shared";
 
-import { GradientBg } from "@/components/shared/GradientBg";
-import { GlowingBadge } from "@/components/shared/GlowingBadge";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Collapsible,
@@ -27,13 +23,11 @@ import { useLineage } from "@/hooks/useLineage";
 import { CONTRACT_ADDRESSES } from "@/lib/contracts";
 import { ROYALTY_SPLITTER_ABI } from "@/lib/abis";
 import {
-  titleVariants,
-  subtitleVariants,
-  cardVariants,
-} from "@/lib/animations";
-
-const PRIMARY_CTA_CLASS =
-  "group inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 disabled:cursor-not-allowed disabled:opacity-50";
+  Button,
+  Chapter,
+  Marginalia,
+  PageWrap,
+} from "@/components/editorial";
 
 const ZERO_TOKEN = "0x0000000000000000000000000000000000000000" as const;
 
@@ -164,7 +158,22 @@ export default function EarningsPage() {
     }
   }, [isConnected, chainOk, account, refresh]);
 
-  const formatted = useMemo(
+  // Compact display: trim long fractional tails so the giant hero number
+  // doesn't push "OG · native" off the line. ≥1 OG → 4 decimals. Anything
+  // smaller → up to 8 significant decimals with trailing zeros stripped.
+  // Tooltip surfaces the full wei-precision value.
+  const formatted = useMemo(() => {
+    if (claimed === null) return "—";
+    const exact = formatEther(claimed);
+    const og = Number(exact);
+    if (!Number.isFinite(og)) return exact;
+    if (og === 0) return "0";
+    if (og >= 1) return og.toFixed(4);
+    const truncated = og.toFixed(8).replace(/0+$/, "").replace(/\.$/, "");
+    return truncated || "0";
+  }, [claimed]);
+
+  const formattedExact = useMemo(
     () => (claimed === null ? "—" : formatEther(claimed)),
     [claimed],
   );
@@ -277,293 +286,331 @@ export default function EarningsPage() {
   }, [client, account, walletClient, proofText, refresh]);
 
   return (
-    <GradientBg variant="subtle" className="min-h-[calc(100vh-4rem)]">
-      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
-        <motion.div initial="hidden" animate="visible" className="mb-10 flex flex-col gap-3">
-          <motion.div variants={subtitleVariants}>
-            <GlowingBadge variant="cyan">Earnings</GlowingBadge>
-          </motion.div>
-          <motion.h1
-            variants={titleVariants}
-            className="text-balance text-4xl font-semibold tracking-tight text-white md:text-5xl"
-          >
-            Claim your royalties
-          </motion.h1>
-          <motion.p
-            variants={subtitleVariants}
-            className="max-w-2xl text-balance text-base text-white/60"
-          >
-            Royalties accrue every settlement window. The off-chain settler
-            posts a Merkle root on-chain and serves a per-recipient proof you
-            can submit here to claim.
-          </motion.p>
-        </motion.div>
+    <div className="pb-24 lg:pb-32">
+      <PageWrap>
+        <Chapter
+          number="03"
+          eyebrow="The ledger"
+          title={
+            <>
+              Claim what's <em className="font-display italic text-copper">owed</em> to you.
+            </>
+          }
+          lede="Royalties accrue every settlement window. The off-chain settler posts a Merkle root on-chain and serves a per-recipient proof you can submit here. One claim per batch per token — the contract enforces it."
+          marginalia={
+            <Marginalia>
+              <p className="mb-2 text-copper">Pulls, not pushes.</p>
+              <p>
+                The splitter never sends funds. You submit a Merkle proof and
+                the contract verifies, then transfers. Gas-efficient and
+                replayable.
+              </p>
+            </Marginalia>
+          }
+        />
 
         {(!isConnected || !chainOk) ? (
-          <motion.div
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            className="rounded-xl border border-white/10 glass-dark p-8"
-          >
-            <div className="flex flex-col items-start gap-4">
-              <p className="text-sm text-white/70">
-                Connect a wallet on 0G Mainnet or 0G Galileo Testnet to view
-                your claimable balance.
-              </p>
+          <div className="editorial-card mt-16 p-8 lg:p-10">
+            <p
+              className="display text-2xl text-paper lg:text-3xl"
+              style={{ fontVariationSettings: '"opsz" 72' }}
+            >
+              Connect a wallet to view your ledger.
+            </p>
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-paper-dim">
+              Lineage runs on 0G Mainnet (chainId&nbsp;16661) and Galileo
+              Testnet (chainId&nbsp;16602). Switch via the masthead.
+            </p>
+            <div className="mt-6">
               <LineageConnectButton />
             </div>
-          </motion.div>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6">
-            <motion.div
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-              className="rounded-xl border border-white/10 glass-dark p-6"
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                  Claimed to date
-                </h3>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={refresh}
-                    disabled={loading || proofsLoading}
-                    aria-label="Refresh balance and proofs"
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-white/10 bg-white/[0.02] text-white/60 transition-colors hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <RefreshCw
-                      className={`h-3.5 w-3.5 ${loading || proofsLoading ? "animate-spin" : ""}`}
-                    />
-                  </button>
-                  <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-white/40">
-                    <Coins className="h-3 w-3" /> native OG
-                  </span>
-                </div>
+          <div className="mt-16 grid grid-cols-12 gap-x-6 gap-y-10">
+            {/* ── Claimed-to-date hero ─────────────────────────────── */}
+            <section className="col-span-12 lg:col-span-8">
+              <div className="flex items-baseline justify-between border-b border-rule pb-3">
+                <span className="label label-copper">Claimed to date</span>
+                <button
+                  type="button"
+                  onClick={refresh}
+                  disabled={loading || proofsLoading}
+                  aria-label="Refresh balance and proofs"
+                  className="inline-flex h-7 w-7 items-center justify-center border border-rule text-paper-faint transition-colors hover:border-copper hover:text-copper disabled:opacity-50"
+                >
+                  <RefreshCw
+                    className={`h-3 w-3 ${loading || proofsLoading ? "animate-spin" : ""}`}
+                  />
+                </button>
               </div>
 
-              <div className="flex items-baseline gap-3">
+              <div className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-1">
                 {loading ? (
-                  <Loader2 className="h-7 w-7 animate-spin text-white/60" />
+                  <Loader2 className="h-9 w-9 animate-spin text-paper-faint" />
                 ) : (
                   <>
-                    <span className="font-mono text-4xl font-semibold text-white">
+                    <span
+                      className="display-upright tabular text-[clamp(2.75rem,6.5vw,4.75rem)] leading-[1.05] text-paper"
+                      style={{ fontVariationSettings: '"opsz" 144' }}
+                      title={`exact: ${formattedExact} OG`}
+                    >
                       {formatted}
                     </span>
-                    <span className="text-base text-white/50">OG</span>
+                    <span className="font-mono text-sm uppercase tracking-[0.22em] text-paper-faint">
+                      OG · native
+                    </span>
                   </>
                 )}
               </div>
-              <p className="mt-2 max-w-xl text-xs text-white/50">
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-paper-dim">
                 Pending claims appear below once the settler posts a batch.
-                Click <span className="font-mono">Claim</span> on any card to
-                submit the on-chain proof.
+                Each row is one proof; one click per row.
               </p>
 
               {loadError && (
-                <div className="mt-4 flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-200">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                <div className="mt-4 flex items-start gap-2 border border-copper/40 bg-copper/5 p-3 font-mono text-[11px] text-copper">
+                  <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                   <span className="break-words">{loadError}</span>
                 </div>
               )}
-            </motion.div>
+            </section>
 
-            {/* Auto-fetched proofs list */}
-            <motion.div
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-              className="rounded-xl border border-white/10 glass-dark p-6"
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                  Outstanding payouts
-                </h3>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-white/40">
-                  {proofs.length} pending
-                </span>
-              </div>
-
-              {proofsError && (
-                <div className="mb-3 flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-xs text-red-200">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span className="break-words">{proofsError}</span>
-                </div>
-              )}
-
-              {proofsLoading && proofs.length === 0 ? (
-                <div className="flex h-20 items-center justify-center">
-                  <Loader2 className="h-5 w-5 animate-spin text-white/40" />
-                </div>
-              ) : proofs.length === 0 ? (
-                <p className="text-sm text-white/50">
-                  No outstanding payouts for this address.
+            {/* ── Network sidebar ──────────────────────────────────── */}
+            <aside className="col-span-12 space-y-6 lg:col-span-3 lg:col-start-10">
+              <div className="border-l border-rule pl-4">
+                <span className="label">On</span>
+                <p
+                  className="mt-2 display text-2xl text-paper"
+                  style={{ fontVariationSettings: '"opsz" 72' }}
+                >
+                  {chain?.name ?? "—"}
                 </p>
-              ) : (
-                <ul className="space-y-2">
-                  <AnimatePresence>
-                    {proofs.map((p) => {
-                      const key = `${p.batchId}:${p.token.toLowerCase()}`;
-                      const isPending = pendingKey === key;
-                      const isJustClaimed = justClaimedKey === key;
-                      const isNative = p.token.toLowerCase() === ZERO_TOKEN;
-                      const tokenLabel = isNative
-                        ? "native OG"
-                        : shortHex(p.token, 6, 4);
-                      let amountFmt = "—";
-                      try {
-                        amountFmt = formatEther(BigInt(p.amount));
-                      } catch {
-                        amountFmt = p.amount;
-                      }
-                      const errMsg =
-                        cardError && cardError.key === key
-                          ? cardError.msg
-                          : null;
-                      return (
-                        <motion.li
-                          key={key}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -8 }}
-                          transition={{ duration: 0.3 }}
-                          className="flex flex-col gap-3 rounded-md border border-white/5 bg-white/[0.02] px-4 py-3"
-                        >
-                          <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="font-mono text-xs text-white/40">
-                                  batch
+                <p className="mt-1 font-mono text-[11px] tabular text-paper-faint">
+                  chainId {chain?.id ?? "—"}
+                </p>
+              </div>
+              <div className="border-l border-rule pl-4">
+                <span className="label">Outstanding</span>
+                <p
+                  className="mt-2 display-upright tabular text-3xl text-paper"
+                  style={{ fontVariationSettings: '"opsz" 96' }}
+                >
+                  {proofs.length}
+                </p>
+                <p className="mt-1 font-mono text-[11px] text-paper-faint">
+                  unclaimed proofs
+                </p>
+              </div>
+            </aside>
+
+            {/* ── Outstanding payouts ──────────────────────────────── */}
+            <section className="col-span-12">
+              <div className="editorial-card">
+                <div className="flex items-baseline justify-between border-b border-rule px-6 py-3 lg:px-8">
+                  <span className="label label-copper">Outstanding payouts</span>
+                  <span className="label tabular">{proofs.length} pending</span>
+                </div>
+
+                {proofsError && (
+                  <div className="mx-6 mt-4 flex items-start gap-2 border border-rust/40 bg-rust/5 p-3 font-mono text-[11px] text-rust lg:mx-8">
+                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    <span className="break-words">{proofsError}</span>
+                  </div>
+                )}
+
+                {proofsLoading && proofs.length === 0 ? (
+                  <div className="flex h-24 items-center justify-center">
+                    <Loader2 className="h-5 w-5 animate-spin text-paper-faint" />
+                  </div>
+                ) : proofs.length === 0 ? (
+                  <div className="flex h-32 flex-col items-center justify-center px-6 text-center">
+                    <p
+                      className="display italic text-2xl text-paper-faint"
+                      style={{ fontVariationSettings: '"opsz" 72' }}
+                    >
+                      Nothing pending.
+                    </p>
+                    <p className="mt-1 font-mono text-[11px] text-paper-mute">
+                      no outstanding payouts for this address
+                    </p>
+                  </div>
+                ) : (
+                  <table className="print-table">
+                    <thead>
+                      <tr>
+                        <th>§ Batch</th>
+                        <th>Posted</th>
+                        <th>Token</th>
+                        <th className="text-right">Amount</th>
+                        <th className="text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {proofs.map((p, i) => {
+                        const key = `${p.batchId}:${p.token.toLowerCase()}`;
+                        const isPending = pendingKey === key;
+                        const isJustClaimed = justClaimedKey === key;
+                        const isNative = p.token.toLowerCase() === ZERO_TOKEN;
+                        const tokenLabel = isNative
+                          ? "native OG"
+                          : shortHex(p.token, 6, 4);
+                        let amountFmt = "—";
+                        try {
+                          amountFmt = formatEther(BigInt(p.amount));
+                        } catch {
+                          amountFmt = p.amount;
+                        }
+                        const errMsg =
+                          cardError && cardError.key === key
+                            ? cardError.msg
+                            : null;
+                        return (
+                          <tr key={key}>
+                            <td>
+                              <div className="flex flex-col">
+                                <span className="chapter-mark">
+                                  §{String(i + 1).padStart(2, "0")}
                                 </span>
-                                <span className="font-mono text-sm text-white">
+                                <span className="font-mono text-sm tabular text-paper">
                                   #{shortBatch(p.batchId)}
                                 </span>
-                                <span className="font-mono text-[10px] uppercase tracking-wider text-white/40">
-                                  · {tokenLabel}
+                              </div>
+                            </td>
+                            <td>
+                              <span className="font-mono text-[11px] text-paper-faint">
+                                {formatPostedAt(p.postedAt)}
+                              </span>
+                              <div className="mt-1">
+                                <a
+                                  href={`${explorerUrl}/tx/${p.txHash}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="link-copper font-mono text-[10px] tabular"
+                                >
+                                  {shortHex(p.txHash, 6, 4)} ↗
+                                </a>
+                              </div>
+                            </td>
+                            <td>
+                              <span className="font-mono text-xs text-paper">
+                                {tokenLabel}
+                              </span>
+                            </td>
+                            <td className="text-right">
+                              <div className="flex items-baseline justify-end gap-1.5">
+                                <span className="display-upright tabular text-lg text-paper">
+                                  {amountFmt}
+                                </span>
+                                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-paper-faint">
+                                  OG
                                 </span>
                               </div>
-                              <div className="mt-1 font-mono text-[10px] text-white/40">
-                                posted {formatPostedAt(p.postedAt)}
-                              </div>
-                            </div>
-                            <div className="flex items-baseline gap-1.5 text-right font-mono text-sm">
-                              <span className="text-white">{amountFmt}</span>
-                              <span className="text-white/40">OG</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between gap-3">
-                            <a
-                              href={`${explorerUrl}/tx/${p.txHash}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="font-mono text-[10px] text-white/40 hover:text-white/70"
-                            >
-                              batch tx {shortHex(p.txHash, 8, 6)}
-                            </a>
-                            <button
-                              type="button"
-                              onClick={() => claimRecord(p)}
-                              disabled={isPending || isJustClaimed}
-                              className={PRIMARY_CTA_CLASS}
-                            >
-                              {isPending ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : isJustClaimed ? (
-                                <CheckCircle2 className="h-4 w-4" />
-                              ) : (
-                                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                              {errMsg && (
+                                <div className="mt-2 flex items-start justify-end gap-1.5 font-mono text-[10px] text-rust">
+                                  <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
+                                  <span className="max-w-[20ch] truncate">
+                                    {errMsg}
+                                  </span>
+                                </div>
                               )}
-                              {isPending
-                                ? "Claiming…"
-                                : isJustClaimed
-                                  ? "Claimed ✓"
-                                  : "Claim"}
-                            </button>
-                          </div>
-                          {errMsg && (
-                            <div className="flex items-start gap-2 rounded-md border border-red-500/30 bg-red-500/5 p-2 text-[11px] text-red-200">
-                              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                              <span className="break-words">{errMsg}</span>
-                            </div>
-                          )}
-                        </motion.li>
-                      );
-                    })}
-                  </AnimatePresence>
-                </ul>
-              )}
-            </motion.div>
+                            </td>
+                            <td className="text-right">
+                              <Button
+                                type="button"
+                                onClick={() => claimRecord(p)}
+                                disabled={isPending || isJustClaimed}
+                                loading={isPending}
+                                variant={isJustClaimed ? "secondary" : "primary"}
+                                size="sm"
+                              >
+                                {isPending ? (
+                                  "Claiming"
+                                ) : isJustClaimed ? (
+                                  <>
+                                    Claimed <CheckCircle2 className="h-3 w-3" />
+                                  </>
+                                ) : (
+                                  <>
+                                    Claim <ArrowUpRight className="h-3 w-3" />
+                                  </>
+                                )}
+                              </Button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </section>
 
-            {/* Secondary affordance — paste proof manually */}
-            <motion.div
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-            >
+            {/* ── Paste-proof appendix ─────────────────────────────── */}
+            <section className="col-span-12">
               <Collapsible>
-                <CollapsibleTrigger className="group inline-flex items-center gap-2 text-xs text-white/40 hover:text-white/70">
-                  <span className="underline decoration-dotted underline-offset-4">
-                    Paste proof manually
-                  </span>
+                <CollapsibleTrigger className="group inline-flex items-baseline gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-paper-faint transition-colors hover:text-copper">
+                  <span>Appendix · paste proof manually</span>
+                  <span className="text-paper-mute group-hover:text-copper">↓</span>
                 </CollapsibleTrigger>
-                <CollapsibleContent className="mt-3">
-                  <div className="rounded-xl border border-white/10 glass-dark p-6">
-                    <h3 className="text-sm font-semibold uppercase tracking-wider text-white/80">
-                      Paste proof
-                    </h3>
-                    <p className="mt-1 text-xs text-white/50">
-                      Submit a JSON object{" "}
-                      <code className="font-mono text-white/70">
+                <CollapsibleContent className="mt-4">
+                  <div className="editorial-card p-6 lg:p-8">
+                    <span className="label">Manual claim</span>
+                    <p
+                      className="mt-3 display text-2xl text-paper"
+                      style={{ fontVariationSettings: '"opsz" 72' }}
+                    >
+                      Submit a proof by hand.
+                    </p>
+                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-paper-dim">
+                      Paste a JSON object{" "}
+                      <code className="font-mono text-copper">
                         {"{ batchId, token, amount, proof: string[] }"}
                       </code>{" "}
-                      supplied by the settler.
+                      from the settler. Use this when the automatic list is
+                      missing a batch you know is yours.
                     </p>
                     <Textarea
                       rows={6}
                       value={proofText}
                       onChange={(e) => setProofText(e.target.value)}
                       placeholder='{\n  "batchId": "1",\n  "token": "0x0000000000000000000000000000000000000000",\n  "amount": "1000000000000000",\n  "proof": ["0x…"]\n}'
-                      className="mt-4 min-h-32 bg-white/[0.02] font-mono text-xs text-white"
+                      className="mt-4 min-h-32 rounded-none border-0 border-b border-rule bg-transparent px-0 font-mono text-xs text-paper placeholder:text-paper-faint focus-visible:border-copper focus-visible:ring-0"
                     />
                     {claimError && (
-                      <div className="mt-3 flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/5 p-3 text-xs text-red-200">
-                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                      <div className="mt-3 flex items-start gap-2 border border-rust/40 bg-rust/5 p-3 font-mono text-[11px] text-rust">
+                        <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                         <span className="break-words">{claimError}</span>
                       </div>
                     )}
                     {claimTx && (
-                      <div className="mt-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3 text-xs text-emerald-200">
+                      <div className="mt-3 border border-moss/40 bg-moss/5 p-3 font-mono text-[11px]" style={{ color: "var(--moss)" }}>
                         Claim submitted ·{" "}
                         <a
                           href={`${explorerUrl}/tx/${claimTx}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="font-mono text-emerald-300 hover:underline"
+                          className="link-copper tabular"
                         >
                           {claimTx.slice(0, 10)}…{claimTx.slice(-6)}
                         </a>
                       </div>
                     )}
-                    <div className="mt-4 flex items-center gap-3">
-                      <button
+                    <div className="mt-6 flex items-center gap-3">
+                      <Button
                         type="button"
                         onClick={submitProof}
-                        disabled={claiming || !proofText.trim()}
-                        className={PRIMARY_CTA_CLASS}
+                        disabled={!proofText.trim()}
+                        loading={claiming}
+                        variant="primary"
+                        size="md"
                       >
-                        {claiming ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                        )}
-                        {claiming ? "Claiming…" : "Submit claim"}
-                      </button>
+                        {claiming ? "Claiming" : "Submit claim"}
+                        {!claiming && <ArrowUpRight className="h-3 w-3" />}
+                      </Button>
                       <button
                         type="button"
                         onClick={refresh}
-                        className="text-sm text-white/50 hover:text-white"
+                        className="font-mono text-[11px] uppercase tracking-[0.22em] text-paper-faint transition-colors hover:text-paper"
                       >
                         Refresh balance
                       </button>
@@ -571,10 +618,10 @@ export default function EarningsPage() {
                   </div>
                 </CollapsibleContent>
               </Collapsible>
-            </motion.div>
+            </section>
           </div>
         )}
-      </div>
-    </GradientBg>
+      </PageWrap>
+    </div>
   );
 }

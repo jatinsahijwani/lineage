@@ -42,11 +42,13 @@ export function FileDropzone({ file, onChange, disabled }: FileDropzoneProps) {
       onDrop={onDrop}
       onClick={() => !disabled && inputRef.current?.click()}
       className={cn(
-        "group relative flex flex-col items-center justify-center rounded-lg border border-dashed border-white/15 px-6 py-10 text-center transition-colors",
-        isOver && "border-blue-400/60 bg-blue-500/5",
+        "group relative flex flex-col items-center justify-center border border-dashed px-6 py-12 text-center transition-colors",
+        isOver
+          ? "border-copper bg-copper/5"
+          : "border-rule hover:border-rule-strong",
         disabled
           ? "cursor-not-allowed opacity-50"
-          : "cursor-pointer hover:border-white/30 hover:bg-white/[0.02]",
+          : "cursor-pointer",
       )}
     >
       <input
@@ -58,15 +60,15 @@ export function FileDropzone({ file, onChange, disabled }: FileDropzoneProps) {
       />
       {file ? (
         <div className="flex w-full items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-white/5">
-              <FileText className="h-5 w-5 text-cyan-300" />
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center border border-copper/40 bg-copper/10">
+              <FileText className="h-5 w-5 text-copper" />
             </div>
             <div className="min-w-0 text-left">
-              <div className="truncate text-sm font-medium text-white">
+              <div className="truncate font-mono text-sm text-paper">
                 {file.name}
               </div>
-              <div className="text-xs text-white/50">
+              <div className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.18em] text-paper-faint tabular">
                 {formatBytes(file.size)}
                 {file.type ? ` · ${file.type}` : ""}
               </div>
@@ -78,7 +80,7 @@ export function FileDropzone({ file, onChange, disabled }: FileDropzoneProps) {
               e.stopPropagation();
               onChange(null);
             }}
-            className="rounded-md p-1.5 text-white/50 hover:bg-white/5 hover:text-white"
+            className="p-2 text-paper-faint transition-colors hover:text-rust"
             aria-label="Remove file"
           >
             <X className="h-4 w-4" />
@@ -86,12 +88,12 @@ export function FileDropzone({ file, onChange, disabled }: FileDropzoneProps) {
         </div>
       ) : (
         <>
-          <Upload className="mb-3 h-8 w-8 text-white/40 transition-colors group-hover:text-white/70" />
-          <div className="text-sm text-white/70">
-            Drop a file here or click to browse
+          <Upload className="mb-4 h-7 w-7 text-paper-faint transition-colors group-hover:text-copper" />
+          <div className="font-display italic text-lg text-paper">
+            Drop a file here, or click to browse.
           </div>
-          <div className="mt-1 text-xs text-white/40">
-            Encrypted with libsodium secretbox before upload to 0G Storage
+          <div className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-paper-faint">
+            Encrypted client-side · pushed to 0G storage
           </div>
         </>
       )}

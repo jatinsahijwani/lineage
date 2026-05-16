@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { formatEther } from "viem";
 import type { PayoutRow } from "./useDemoScreen";
 
@@ -34,68 +33,82 @@ function useEaseOut(target: number, durationMs = 800): number {
   return v;
 }
 
-function PayoutRowItem({ row }: { row: PayoutRow }) {
+function PayoutRowItem({ row, rank }: { row: PayoutRow; rank: number }) {
   const targetOg = useMemo(() => {
-    // Wei (string) -> OG (number) for the easing animation. Demo amounts are
-    // well under 2^53 wei so direct Number() is fine here.
     try {
       return Number(formatEther(BigInt(row.amount)));
     } catch {
       return 0;
     }
   }, [row.amount]);
-  const animatedAmount = useEaseOut(targetOg, 800);
-  const initial = row.label.replace(/[^A-Za-z0-9]/g, "").slice(0, 2) || "??";
+  const animated = useEaseOut(targetOg, 800);
   return (
-    <motion.li
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="flex items-center justify-between gap-3 rounded-md border border-white/5 bg-white/[0.02] px-3 py-2.5"
-    >
-      <div className="flex min-w-0 items-center gap-3">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 text-xs font-semibold text-white">
-          {initial}
-        </div>
-        <div className="min-w-0">
-          <div className="truncate text-sm text-white">{row.label}</div>
-          <div className="font-mono text-[10px] text-white/40">
+    <tr>
+      <td className="w-16 align-baseline">
+        <span className="chapter-mark">
+          §{String(rank).padStart(2, "0")}
+        </span>
+      </td>
+      <td>
+        <div className="flex flex-col">
+          <span className="font-mono text-sm tabular text-paper">{row.label}</span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-paper-faint tabular">
             weight {(row.weight * 100).toFixed(1)}%
-          </div>
+          </span>
         </div>
-      </div>
-      <div className="text-right font-mono text-sm">
-        <span className="text-white">{animatedAmount.toFixed(6)}</span>
-        <span className="ml-1 text-white/40">OG</span>
-      </div>
-    </motion.li>
+      </td>
+      <td className="text-right">
+        <span className="display-upright tabular text-lg text-paper">
+          {animated.toFixed(6)}
+        </span>
+        <span className="ml-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-paper-faint">
+          OG
+        </span>
+      </td>
+    </tr>
   );
 }
 
 export function PayoutsCard({ payouts }: PayoutsCardProps) {
   return (
-    <div className="rounded-xl border border-white/10 glass-dark p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-white/80">
-          Royalties Streaming
-        </h3>
-        <span className="font-mono text-[10px] uppercase tracking-wider text-white/40">
-          demo · client-side mock
+    <article className="editorial-card">
+      <div className="flex items-center justify-between border-b border-rule px-6 py-3 lg:px-8">
+        <span className="label label-copper">The ledger · royalties</span>
+        <span className="label text-paper-faint">
+          {payouts.length > 0 ? `${payouts.length} recipient(s)` : "awaiting batch"}
         </span>
       </div>
+
       {payouts.length === 0 ? (
-        <div className="flex h-32 flex-col items-center justify-center gap-2 text-center text-sm text-white/50">
-          Payouts appear after you click <span className="font-mono">Settle now</span>.
+        <div className="flex h-32 flex-col items-center justify-center px-6 text-center">
+          <p
+            className="display italic text-2xl text-paper-faint"
+            style={{ fontVariationSettings: '"opsz" 72' }}
+          >
+            Nothing settled yet.
+          </p>
+          <p className="mt-1 font-mono text-[11px] text-paper-mute">
+            payouts appear after you click <span className="text-copper">Settle now</span>
+          </p>
         </div>
       ) : (
-        <ul className="space-y-2">
-          <AnimatePresence>
-            {payouts.map((p) => (
-              <PayoutRowItem key={p.recipient} row={p} />
-            ))}
-          </AnimatePresence>
-        </ul>
+        <div className="px-6 py-2 lg:px-8">
+          <table className="print-table">
+            <thead>
+              <tr>
+                <th>§</th>
+                <th>Recipient</th>
+                <th className="text-right">Payout</th>
+              </tr>
+            </thead>
+            <tbody>
+              {payouts.map((p, i) => (
+                <PayoutRowItem key={p.recipient} row={p} rank={i + 1} />
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
-    </div>
+    </article>
   );
 }

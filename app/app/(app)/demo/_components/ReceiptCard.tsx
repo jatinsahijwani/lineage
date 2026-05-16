@@ -1,9 +1,7 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
 import type { AttributionReceipt } from "@lineage/shared";
-import { GlowingBadge } from "@/components/shared/GlowingBadge";
-import { cn } from "@/lib/utils";
+import { Badge } from "@/components/editorial";
 import type { DemoStatus } from "./useDemoScreen";
 
 interface ReceiptCardProps {
@@ -22,21 +20,23 @@ export function ReceiptCard({ receipt, status }: ReceiptCardProps) {
     status === "compute" ||
     status === "attestation" ||
     status === "persisting";
+
+  const stateTone: "default" | "copper" | "moss" = isRunning
+    ? "copper"
+    : receipt
+      ? "moss"
+      : "default";
   const stateLabel = isRunning
     ? status === "attestation"
-      ? "attesting…"
+      ? "attesting"
       : status === "persisting"
-        ? "persisting…"
-        : "computing…"
+        ? "persisting"
+        : "computing"
     : receipt
       ? "signed"
       : "idle";
 
-  const stateVariant: "blue" | "purple" | "cyan" = isRunning
-    ? "blue"
-    : "purple";
-
-  const rows = receipt
+  const rows: [string, string][] = receipt
     ? [
         ["version", receipt.version],
         ["receiptId", trunc(receipt.receiptId, 8, 6)],
@@ -50,41 +50,37 @@ export function ReceiptCard({ receipt, status }: ReceiptCardProps) {
     : [];
 
   return (
-    <div className="rounded-xl border border-white/10 glass-dark p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-white/80">
-          Attribution Receipt
-        </h3>
-        <GlowingBadge variant={stateVariant}>{stateLabel}</GlowingBadge>
+    <article className="editorial-card relative">
+      <div className="flex items-center justify-between border-b border-rule px-6 py-3 lg:px-8">
+        <span className="label label-copper">Attribution receipt</span>
+        <Badge tone={stateTone}>{stateLabel}</Badge>
       </div>
+
       {receipt ? (
-        <ul className="space-y-1.5">
-          <AnimatePresence>
-            {rows.map(([label, value], i) => (
-              <motion.li
-                key={label}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.08 }}
-                className={cn(
-                  "flex items-center justify-between gap-4 rounded-md px-2 py-1 font-mono text-xs",
-                )}
-              >
-                <span className="shrink-0 text-white/50">{label}</span>
-                <span className="truncate text-right text-white">{value}</span>
-              </motion.li>
-            ))}
-          </AnimatePresence>
-        </ul>
+        <dl className="divide-y divide-rule">
+          {rows.map(([label, value]) => (
+            <div
+              key={label}
+              className="flex items-baseline justify-between gap-4 px-6 py-2.5 font-mono text-xs lg:px-8"
+            >
+              <dt className="shrink-0 text-paper-faint">{label}</dt>
+              <dd className="truncate text-right tabular text-paper">{value}</dd>
+            </div>
+          ))}
+        </dl>
       ) : (
-        <div className="flex h-40 flex-col items-center justify-center gap-2 text-center">
-          <div className="text-sm text-white/50">
-            {isRunning
-              ? "Submitting to 0G Compute…"
-              : "Receipt will appear after you run inference."}
-          </div>
+        <div className="flex h-44 flex-col items-center justify-center gap-1 px-6 text-center">
+          <p
+            className="display italic text-2xl text-paper-faint"
+            style={{ fontVariationSettings: '"opsz" 72' }}
+          >
+            {isRunning ? "Submitting to 0G Compute…" : "No receipt yet."}
+          </p>
+          <p className="font-mono text-[11px] text-paper-mute">
+            {isRunning ? "the TEE will sign in a moment" : "run an inference to produce one"}
+          </p>
         </div>
       )}
-    </div>
+    </article>
   );
 }

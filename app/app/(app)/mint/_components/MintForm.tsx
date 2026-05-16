@@ -1,15 +1,18 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ArrowRight, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, AlertTriangle } from "lucide-react";
 
 import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
-import { GlowingBadge } from "@/components/shared/GlowingBadge";
 import { LineageConnectButton } from "@/components/connect-button";
 import { useLineage } from "@/hooks/useLineage";
 import { ZG_TESTNET } from "@lineage/shared";
-import { cardVariants } from "@/lib/animations";
+import {
+  Badge,
+  Button,
+  Card,
+  Field,
+  LinkButton,
+} from "@/components/editorial";
 
 import { FileDropzone } from "./FileDropzone";
 import { ParentsPicker } from "./ParentsPicker";
@@ -21,16 +24,13 @@ interface MintFormProps {
   description: string;
 }
 
-const PRIMARY_CTA_CLASS =
-  "group inline-flex items-center gap-2 rounded-lg bg-blue-600 px-8 py-3.5 font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-blue-600 disabled:hover:shadow-none";
-
-const STATUS_LABELS: Record<string, string> = {
-  idle: "Ready",
-  preparing: "Encrypting & hashing…",
-  uploading: "Uploading to 0G Storage…",
-  minting: "Submitting mint transaction…",
-  success: "Minted",
-  error: "Error",
+const STATUS_LABEL: Record<string, string> = {
+  idle: "Standing by",
+  preparing: "Encrypting & hashing",
+  uploading: "Pushing to 0G Storage",
+  minting: "Registering on-chain",
+  success: "Registered",
+  error: "Halted",
 };
 
 export function MintForm({ kind, title, description }: MintFormProps) {
@@ -47,203 +47,263 @@ export function MintForm({ kind, title, description }: MintFormProps) {
     screen.status === "uploading" ||
     screen.status === "minting";
 
+  // ── Wallet gate ─────────────────────────────────────────────────────────
   if (!isConnected || !chainOk) {
     return (
-      <motion.div
-        variants={cardVariants}
-        initial="hidden"
-        animate="visible"
-        className="rounded-xl border border-white/10 glass-dark p-8"
-      >
-        <div className="flex flex-col items-start gap-4">
-          <GlowingBadge variant="purple">Wallet required</GlowingBadge>
-          <h3 className="text-xl font-semibold text-white">{title}</h3>
-          <p className="text-sm text-white/60">
-            {!isConnected
-              ? "Connect a wallet to begin."
-              : "Switch to 0G Mainnet or 0G Galileo Testnet to continue."}
-          </p>
+      <Card eyebrow="Wallet required" meta="§ pre-roll">
+        <p className="display text-3xl text-paper" style={{ fontVariationSettings: '"opsz" 72' }}>
+          {!isConnected ? "Connect a wallet to begin." : "Switch network to continue."}
+        </p>
+        <p className="mt-3 max-w-md text-sm leading-relaxed text-paper-dim">
+          Lineage runs on 0G Mainnet (chainId&nbsp;16661) and 0G Galileo
+          Testnet (chainId&nbsp;16602). Pick a network from the masthead and
+          we'll resume here.
+        </p>
+        <div className="mt-6">
           <LineageConnectButton />
         </div>
-      </motion.div>
+      </Card>
     );
   }
 
+  // ── Success state ───────────────────────────────────────────────────────
   if (screen.status === "success" && screen.result) {
     return (
-      <motion.div
-        variants={cardVariants}
-        initial="hidden"
-        animate="visible"
-        className="rounded-xl border border-cyan-500/20 glass-dark p-8"
+      <Card
+        eyebrow="Registered on-chain"
+        meta={`§ token #${screen.result.tokenId.toString()}`}
+        accent
       >
-        <div className="flex flex-col gap-4">
-          <GlowingBadge variant="cyan">Mint confirmed</GlowingBadge>
-          <h3 className="text-xl font-semibold text-white">
-            {title} iNFT minted
-          </h3>
-          <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-            <div className="grid grid-cols-1 gap-3 font-mono text-xs text-white/80 md:grid-cols-2">
-              <div>
-                <div className="text-white/40">Token id</div>
-                <div className="mt-1 text-white">
-                  #{screen.result.tokenId.toString()}
-                </div>
-              </div>
-              <div className="min-w-0">
-                <div className="text-white/40">Tx hash</div>
-                <a
-                  href={`${explorerUrl}/tx/${screen.result.txHash}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-1 block truncate text-cyan-300 hover:underline"
-                >
-                  {screen.result.txHash}
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={screen.reset}
-              className={PRIMARY_CTA_CLASS}
+        <h3
+          className="display text-3xl text-paper lg:text-4xl"
+          style={{ fontVariationSettings: '"opsz" 96' }}
+        >
+          {title} iNFT minted —{" "}
+          <em className="text-copper">welcome to the lineage.</em>
+        </h3>
+        <p className="mt-4 max-w-xl text-sm leading-relaxed text-paper-dim">
+          From this transaction forward, every inference that touches your
+          contribution owes you a share. Royalties accrue under your address;
+          claim them from §03 · Earnings.
+        </p>
+
+        <dl className="mt-8 grid grid-cols-1 gap-px bg-rule md:grid-cols-2">
+          <div className="bg-ink p-5">
+            <div className="label mb-2">Token id</div>
+            <p
+              className="display-upright tabular text-3xl text-paper"
+              style={{ fontVariationSettings: '"opsz" 96' }}
             >
-              Mint another
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </button>
+              #{screen.result.tokenId.toString()}
+            </p>
+          </div>
+          <div className="bg-ink p-5">
+            <div className="label mb-2">Tx hash</div>
             <a
               href={`${explorerUrl}/tx/${screen.result.txHash}`}
               target="_blank"
               rel="noreferrer"
-              className="text-sm text-white/60 hover:text-white"
+              className="link-copper block break-all font-mono text-xs tabular text-paper"
             >
-              View on explorer →
+              {screen.result.txHash}
             </a>
           </div>
+        </dl>
+
+        <div className="mt-8 flex flex-wrap items-center gap-3">
+          <Button onClick={screen.reset} variant="primary" size="lg">
+            Mint another <ArrowUpRight className="h-3.5 w-3.5" />
+          </Button>
+          <LinkButton
+            href={`${explorerUrl}/tx/${screen.result.txHash}`}
+            variant="ghost"
+            external
+          >
+            View on explorer ↗
+          </LinkButton>
+          <LinkButton href="/demo" variant="ghost">
+            Or run an inference against it ↗
+          </LinkButton>
         </div>
-      </motion.div>
+      </Card>
     );
   }
 
+  // ── Compose state ───────────────────────────────────────────────────────
   return (
-    <motion.div
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      className="rounded-xl border border-white/10 glass-dark p-6 md:p-8"
-    >
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <h3 className="text-lg font-semibold text-white">{title}</h3>
-          <p className="mt-1 text-sm text-white/60">{description}</p>
-        </div>
-        <span className="rounded-full border border-white/10 bg-white/[0.02] px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-white/60">
-          {STATUS_LABELS[screen.status] ?? screen.status}
-        </span>
-      </div>
+    <div className="grid grid-cols-12 gap-x-6 gap-y-10">
+      {/* Left column — the form */}
+      <div className="col-span-12 lg:col-span-8">
+        <div className="editorial-card relative">
+          {/* Status strip */}
+          <div className="flex items-center justify-between border-b border-rule px-6 py-3 lg:px-8">
+            <span className="label label-copper">{title} · compose</span>
+            <span className="label tabular">
+              {STATUS_LABEL[screen.status] ?? screen.status}
+            </span>
+          </div>
 
-      <div className="space-y-6">
-        <FileDropzone
-          file={screen.file}
-          onChange={screen.setFile}
-          disabled={inFlight}
-        />
-
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div>
-            <div className="flex items-center justify-between">
-              <Label className="text-white">Royalty rate</Label>
-              <span className="font-mono text-sm text-cyan-300">
-                {(screen.royaltyBps / 100).toFixed(2)}%
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-white/40">
-              Total royalty taken from each downstream payout. Range 0–20%.
-            </p>
-            <div className="mt-3">
-              <Slider
-                value={[screen.royaltyBps]}
-                onValueChange={(v) => screen.setRoyaltyBps(v[0] ?? 0)}
-                min={0}
-                max={2000}
-                step={10}
+          <div className="space-y-8 p-6 lg:p-8">
+            <Field
+              label="Artifact"
+              hint="Encrypted client-side with libsodium. Plaintext never leaves your browser. We push the ciphertext to 0G Storage and anchor its root in LineageRegistry."
+            >
+              <FileDropzone
+                file={screen.file}
+                onChange={screen.setFile}
                 disabled={inFlight}
               />
-            </div>
-          </div>
+            </Field>
 
-          <div>
-            <div className="flex items-center justify-between">
-              <Label className="text-white">Owner / upstream split</Label>
-              <span className="font-mono text-sm text-cyan-300">
-                owner {(screen.ownerSplitBps / 100).toFixed(0)}% · upstream{" "}
-                {((10000 - screen.ownerSplitBps) / 100).toFixed(0)}%
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-white/40">
-              How the royalty splits between you (owner) and your upstream
-              contributors.
-            </p>
-            <div className="mt-3">
-              <Slider
-                value={[screen.ownerSplitBps]}
-                onValueChange={(v) => screen.setOwnerSplitBps(v[0] ?? 0)}
-                min={0}
-                max={10000}
-                step={100}
-                disabled={inFlight}
-              />
-            </div>
-          </div>
-        </div>
-
-        {showParents && (
-          <div className="rounded-lg border border-white/5 bg-white/[0.01] p-4">
-            <ParentsPicker
-              parents={screen.parents}
-              onChange={screen.setParents}
-            />
-          </div>
-        )}
-
-        {screen.status === "error" && screen.error && (
-          <div className="flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/5 p-4">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
-            <div className="flex-1 text-sm text-red-200">
-              <div className="font-medium">Mint failed</div>
-              <div className="mt-1 break-words text-red-200/80">
-                {screen.error}
-              </div>
-              <button
-                type="button"
-                onClick={screen.mint}
-                className="mt-3 inline-flex items-center gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-200 hover:bg-red-500/20"
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              <Field
+                label="Royalty rate"
+                meta={`${(screen.royaltyBps / 100).toFixed(2)}%`}
+                hint="Total royalty taken from each downstream payout. Range 0–20%. Editable later behind a 24h timelock."
               >
-                Retry
-              </button>
+                <Slider
+                  value={[screen.royaltyBps]}
+                  onValueChange={(v) => screen.setRoyaltyBps(v[0] ?? 0)}
+                  min={0}
+                  max={2000}
+                  step={10}
+                  disabled={inFlight}
+                />
+              </Field>
+
+              <Field
+                label="Owner / upstream split"
+                meta={`owner ${(screen.ownerSplitBps / 100).toFixed(0)}% · upstream ${((10000 - screen.ownerSplitBps) / 100).toFixed(0)}%`}
+                hint="How your royalty divides between you and the upstream contributors you declared as parents."
+              >
+                <Slider
+                  value={[screen.ownerSplitBps]}
+                  onValueChange={(v) => screen.setOwnerSplitBps(v[0] ?? 0)}
+                  min={0}
+                  max={10000}
+                  step={100}
+                  disabled={inFlight}
+                />
+              </Field>
+            </div>
+
+            {showParents && (
+              <Field
+                label="Upstream lineage"
+                hint="Declare the iNFTs this work was derived from. Weights must sum to 10000 bps. You can leave this empty for an unattributed mint, but downstream contributors won't credit you."
+              >
+                <div className="border border-rule p-4">
+                  <ParentsPicker
+                    parents={screen.parents}
+                    onChange={screen.setParents}
+                  />
+                </div>
+              </Field>
+            )}
+
+            {screen.status === "error" && screen.error && (
+              <div className="border border-rust/40 bg-rust/5 p-4">
+                <div className="mb-2 flex items-center gap-2">
+                  <AlertTriangle className="h-3.5 w-3.5 text-rust" />
+                  <span className="label" style={{ color: "var(--rust)" }}>
+                    Mint halted
+                  </span>
+                </div>
+                <p className="break-words font-mono text-xs leading-relaxed text-paper">
+                  {screen.error}
+                </p>
+                <div className="mt-4">
+                  <Button onClick={screen.mint} variant="danger" size="sm">
+                    Retry
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 border-t border-rule pt-6">
+              <Button
+                onClick={screen.mint}
+                disabled={!screen.file}
+                loading={inFlight}
+                variant="primary"
+                size="lg"
+              >
+                {inFlight
+                  ? STATUS_LABEL[screen.status]
+                  : screen.status === "success"
+                    ? "Minted"
+                    : `Mint ${title}`}
+                {!inFlight && screen.status !== "success" && (
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                )}
+                {screen.status === "success" && (
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                )}
+              </Button>
             </div>
           </div>
-        )}
-
-        <div className="flex items-center justify-end gap-3 pt-2">
-          <button
-            type="button"
-            onClick={screen.mint}
-            disabled={inFlight || !screen.file}
-            className={PRIMARY_CTA_CLASS}
-          >
-            {inFlight ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : screen.status === "success" ? (
-              <CheckCircle2 className="h-4 w-4" />
-            ) : (
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            )}
-            {inFlight ? "Minting…" : `Mint ${title}`}
-          </button>
         </div>
       </div>
-    </motion.div>
+
+      {/* Right column — process notes (a sidebar of the protocol's own copy) */}
+      <aside className="col-span-12 space-y-8 lg:col-span-4">
+        <div>
+          <div className="label mb-4">The process</div>
+          <ol className="space-y-5 border-l border-rule pl-5 text-[0.95rem] leading-[1.65] text-paper-dim">
+            <li className="flex gap-3">
+              <span className="font-mono text-[12px] tabular text-copper-dim shrink-0 pt-0.5">
+                i.
+              </span>
+              <span>
+                <span className="text-paper">Encrypt</span> the artifact with
+                a one-time symmetric key (XSalsa20-Poly1305).
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="font-mono text-[12px] tabular text-copper-dim shrink-0 pt-0.5">
+                ii.
+              </span>
+              <span>
+                <span className="text-paper">Upload</span> the ciphertext to
+                0G Storage via the Lineage Agent Host. You sign zero gas; the
+                host covers the storage fee.
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="font-mono text-[12px] tabular text-copper-dim shrink-0 pt-0.5">
+                iii.
+              </span>
+              <span>
+                <span className="text-paper">Register</span> the storage
+                root, royalty policy, and parents in{" "}
+                <span className="font-mono text-[13px] text-paper">
+                  LineageRegistry.mintWithLineage
+                </span>{" "}
+                from your wallet. One transaction.
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="font-mono text-[12px] tabular text-copper-dim shrink-0 pt-0.5">
+                iv.
+              </span>
+              <span>
+                <span className="text-paper">Earn.</span> Every inference that
+                composes your contribution streams royalties under your
+                address.
+              </span>
+            </li>
+          </ol>
+        </div>
+
+        <div className="border-t border-rule pt-6">
+          <div className="flex items-baseline justify-between">
+            <span className="label">Network</span>
+            <Badge tone={chain && chain.id === 16602 ? "copper" : "moss"}>
+              {chain?.name ?? "—"}
+            </Badge>
+          </div>
+        </div>
+      </aside>
+    </div>
   );
 }
